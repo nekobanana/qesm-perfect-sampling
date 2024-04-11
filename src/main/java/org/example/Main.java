@@ -7,6 +7,8 @@ import org.example.model.RunResult;
 import org.la4j.Matrix;
 import org.oristool.models.gspn.chains.DTMCStationary;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,17 @@ public class Main {
         Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
         System.out.println(solutionSS);
 
-        PerfectSampler sampler = new PerfectSampler(Matrix.from2DArray(P));
-        RunResult result = sampler.runUntilCoalescence();
-        System.out.println("Sampled state: " +  result.getSampledState() + "\t Steps: " + result.getSteps());
+        List<RunResult> results = new ArrayList<>();
+        int runs = 10000;
+
+        for (int i = 0; i < runs; i++) {
+            PerfectSampler sampler = new PerfectSampler(Matrix.from2DArray(P));
+            RunResult result = sampler.runUntilCoalescence();
+            results.add(result);
+        }
+        Map<Integer, Long> pi = results.stream().collect(Collectors.groupingBy(RunResult::getSampledState, Collectors.counting()));
+        pi.forEach((state, count) -> System.out.println("state " + state + ", count: " + (double)count / runs));
+        System.out.println("Avg. steps: " + results.stream().mapToInt(RunResult::getSteps).sum() / runs);
+        //        results.forEach(System.out::println);
     }
 }

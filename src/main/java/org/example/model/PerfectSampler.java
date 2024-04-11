@@ -12,12 +12,9 @@ public class PerfectSampler {
 
     public PerfectSampler(Matrix P) {
         assert (P.rows() == P.columns());
+
         this.n = P.rows();
         this.P = P;
-    }
-
-    public StatesSnapshot getStates(int time) {
-        return sequences.get(-time);
     }
 
     public State getState(int stateId, int time) {

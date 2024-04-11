@@ -17,11 +17,8 @@ public class RunResult {
         return steps;
     }
 
-    void setSampledState(int sampledState) {
-        this.sampledState = sampledState;
-    }
-
-    void setSteps(int steps) {
-        this.steps = steps;
+    @Override
+    public String toString() {
+        return "sampled state: " + sampledState + ", steps: " + steps;
     }
 }
