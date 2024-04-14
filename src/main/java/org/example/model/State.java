@@ -1,8 +1,12 @@
 package org.example.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class State {
     private int id;
     private int flag;
+    @JsonIgnore
     private State next;
 
     public int getId() {
@@ -21,8 +25,10 @@ public class State {
         this.flag = flag;
     }
 
-    public State getNext() {
-        return next;
+    @JsonProperty
+    public Integer getNextStateId() {
+        if (next == null) return null;
+        return next.getId();
     }
 
     public void setNext(State next) {

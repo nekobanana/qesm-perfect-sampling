@@ -7,6 +7,7 @@ import org.example.model.RunResult;
 import org.la4j.Matrix;
 import org.oristool.models.gspn.chains.DTMCStationary;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,19 @@ public class Main {
         Map<Integer, Long> pi = results.stream().collect(Collectors.groupingBy(RunResult::getSampledState, Collectors.counting()));
         pi.forEach((state, count) -> System.out.println("state " + state + ", count: " + (double)count / runs));
         System.out.println("Avg. steps: " + results.stream().mapToInt(RunResult::getSteps).sum() / runs);
+        Map<Integer, Long> hist = results.stream().collect(Collectors.groupingBy(RunResult::getSteps, Collectors.counting()));
+        hist.forEach((state, count) -> System.out.println("steps: " + state + ", count: " + count));
         //        results.forEach(System.out::println);
+
+        // Another sample only for the drawing
+        PerfectSampler sampler = new PerfectSampler(Matrix.from2DArray(P));
+        sampler.runUntilCoalescence();
+        try {
+            sampler.writeSequenceToFile("postprocess/output.json");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+
 }

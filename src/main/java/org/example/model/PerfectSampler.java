@@ -1,24 +1,37 @@
 package org.example.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.la4j.Matrix;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PerfectSampler {
     private final int n;
     private final Matrix P;
-    private final List<StatesSnapshot> sequences = new ArrayList<>();
+    private final List<StatesSnapshot> sequence = new ArrayList<>();
+    @JsonIgnore
+    private ObjectMapper mapper;
 
     public PerfectSampler(Matrix P) {
         assert (P.rows() == P.columns());
 
         this.n = P.rows();
         this.P = P;
+
+        mapper = new ObjectMapper();
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
     public State getState(int stateId, int time) {
-        return sequences.get(-time).getState(stateId);
+        return sequence.get(-time).getState(stateId);
     }
 
     public void initSequence() {
@@ -29,7 +42,7 @@ public class PerfectSampler {
             s.setFlag(i);
             initStatesSnapshot.addState(i, s);
         }
-        sequences.add(initStatesSnapshot);
+        sequence.add(initStatesSnapshot);
     }
 
     public StatesSnapshot generateNewSnapshot() {
@@ -39,7 +52,7 @@ public class PerfectSampler {
             // via via che gli stati coalescono non devo più iterare su tutti
             State s = new State();
             s.setId(i);
-            State nextState = getState(generateNextStateNumber(i), - (sequences.size()-1));
+            State nextState = getState(generateNextStateNumber(i), - (sequence.size()-1));
             s.setNext(nextState);
             s.setFlag(nextState.getFlag());
             newStatesSnapshot.addState(i, s);
@@ -56,10 +69,10 @@ public class PerfectSampler {
             t--;
             StatesSnapshot newStatesSnapshot = generateNewSnapshot();
             newStatesSnapshot.setTime(t);
-            sequences.add(newStatesSnapshot);
+            sequence.add(newStatesSnapshot);
             coalesced = newStatesSnapshot.haveCoalesced();
         }
-        StatesSnapshot lastStatesSnapshot = sequences.get(sequences.size() - 1);
+        StatesSnapshot lastStatesSnapshot = sequence.get(sequence.size() - 1);
         return new RunResult(lastStatesSnapshot.getState(0).getFlag(), -lastStatesSnapshot.getTime());
     }
 
@@ -77,6 +90,15 @@ public class PerfectSampler {
             }
         }
         throw new RuntimeException("Error generating next state number");
+    }
+
+    public void writeSequenceToFile(String fileName)
+            throws IOException {
+//        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = mapper.writeValueAsString(this);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        writer.write(json);
+        writer.close();
     }
 
 }
