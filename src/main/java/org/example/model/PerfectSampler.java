@@ -1,9 +1,5 @@
 package org.example.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.la4j.Matrix;
 
 import java.io.BufferedWriter;
@@ -12,29 +8,30 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PerfectSampler {
-    private final int n;
-    private final Matrix P;
+public class PerfectSampler extends Sampler {
+//    private final int n;
+//    private final Matrix P;
     private final List<StatesSnapshot> sequence = new ArrayList<>();
-    @JsonIgnore
-    private ObjectMapper mapper;
+//    @JsonIgnore
+//    private ObjectMapper mapper;
 
     public PerfectSampler(Matrix P) {
-        assert (P.rows() == P.columns());
-
-        this.n = P.rows();
-        this.P = P;
-
-        mapper = new ObjectMapper();
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        super(P);
+//        assert (P.rows() == P.columns());
+//
+//        this.n = P.rows();
+//        this.P = P;
+//
+//        mapper = new ObjectMapper();
+//        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+//        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
     public State getState(int stateId, int time) {
         return sequence.get(-time).getState(stateId);
     }
 
-    public void initSequence() {
+    private void initSequence() {
         StatesSnapshot initStatesSnapshot = new StatesSnapshot();
         for (int i = 0; i < n; i++) {
             State s = new State();
@@ -45,7 +42,7 @@ public class PerfectSampler {
         sequence.add(initStatesSnapshot);
     }
 
-    public StatesSnapshot generateNewSnapshot() {
+    private StatesSnapshot generateNewSnapshot() {
         StatesSnapshot newStatesSnapshot = new StatesSnapshot();
         for (int i = 0; i < n; i++) {
             // se invece di coupling from the past vado in avanti
@@ -62,7 +59,6 @@ public class PerfectSampler {
 
     public RunResult runUntilCoalescence() {
         initSequence();
-        assert(P.rows() == P.columns());
         int t = 0;
         boolean coalesced = false;
         while (!coalesced) {
@@ -76,25 +72,8 @@ public class PerfectSampler {
         return new RunResult(lastStatesSnapshot.getState(0).getFlag(), -lastStatesSnapshot.getTime());
     }
 
-    private int generateNextStateNumber(int i) {
-        State s = new State();
-        s.setId(i);
-        double leftThreshold;
-        double rightThreshold = 0;
-        double r = Math.random();
-        for (int j = 0; j < n; j++) {
-            leftThreshold = rightThreshold;
-            rightThreshold = P.get(i, j) + leftThreshold;
-            if (r < rightThreshold) {
-                return j;
-            }
-        }
-        throw new RuntimeException("Error generating next state number");
-    }
-
     public void writeSequenceToFile(String fileName)
             throws IOException {
-//        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = mapper.writeValueAsString(this);
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
         writer.write(json);

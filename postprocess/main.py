@@ -1,8 +1,9 @@
 import json
 
 import matplotlib.pyplot as plt
+import numpy as np
 
-data = json.load(open('output.json'))
+data = json.load(open('output_seq.json'))
 n = data['P']['rows']
 for s in data['sequence']:
     time = s['time']
@@ -24,3 +25,11 @@ for stateId in range(n):
             plt.plot([time, time + 1], [prev_stateId, state['nextStateId']], c=c)
             prev_stateId = state['nextStateId']
 plt.savefig('output.png')
+
+plt.figure()
+results = json.load(open('results.json'))
+steps = [r['steps'] for r in results]
+counts, bins = np.histogram(steps, bins=np.arange(0, max(steps)))
+plt.xticks(np.arange(0, max(steps), 2))
+plt.hist(bins[:-1], bins, weights=counts)
+plt.savefig('hist.png')
