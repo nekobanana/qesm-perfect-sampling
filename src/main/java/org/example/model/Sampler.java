@@ -40,5 +40,5 @@ public abstract class Sampler {
         throw new RuntimeException("Error generating next state number");
     }
 
-//    abstract protected Object run();
+    abstract public void reset();
 }

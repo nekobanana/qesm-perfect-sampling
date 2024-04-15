@@ -7,13 +7,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class PerfectSampler extends Sampler {
+public class PerfectSamplerForward extends Sampler {
 
     private final List<StatesSnapshot> sequence = new ArrayList<>();
 
 
-    public PerfectSampler(Matrix P) {
+    public PerfectSamplerForward(Matrix P) {
         super(P);
     }
 
@@ -31,7 +32,6 @@ public class PerfectSampler extends Sampler {
         for (int i = 0; i < n; i++) {
             State s = new State();
             s.setId(i);
-            s.setFlag(i);
             initStatesSnapshot.addState(i, s);
         }
         sequence.add(initStatesSnapshot);
@@ -39,15 +39,17 @@ public class PerfectSampler extends Sampler {
 
     private StatesSnapshot generateNewSnapshot() {
         StatesSnapshot newStatesSnapshot = new StatesSnapshot();
-        for (int i = 0; i < n; i++) {
-            // se invece di coupling from the past vado in avanti
-            // via via che gli stati coalescono non devo più iterare su tutti
-            State s = new State();
-            s.setId(i);
-            State nextState = getState(generateNextStateNumber(i), - (sequence.size()-1));
-            s.setNext(nextState);
-            s.setFlag(nextState.getFlag());
-            newStatesSnapshot.addState(i, s);
+        for (Map.Entry<Integer, State> entry : sequence.get(sequence.size() - 1).getStates().entrySet()) {
+            State s;
+            int currentStateId = generateNextStateNumber(entry.getKey());
+            if (!newStatesSnapshot.getStates().containsKey(currentStateId)) {
+                s = new State();
+                s.setId(currentStateId);
+                newStatesSnapshot.addState(currentStateId, s);
+            }
+            s = newStatesSnapshot.getState(currentStateId);
+            entry.getValue().setNext(s);
+            newStatesSnapshot.addState(currentStateId, s);
         }
         return newStatesSnapshot;
     }
@@ -57,14 +59,14 @@ public class PerfectSampler extends Sampler {
         int t = 0;
         boolean coalesced = false;
         while (!coalesced) {
-            t--;
+            t++;
             StatesSnapshot newStatesSnapshot = generateNewSnapshot();
             newStatesSnapshot.setTime(t);
             sequence.add(newStatesSnapshot);
-            coalesced = newStatesSnapshot.haveCoalesced();
+            coalesced = newStatesSnapshot.getStates().size() == 1;
         }
         StatesSnapshot lastStatesSnapshot = sequence.get(sequence.size() - 1);
-        return new RunResult(lastStatesSnapshot.getState(0).getFlag(), -lastStatesSnapshot.getTime());
+        return new RunResult(lastStatesSnapshot.getStates().keySet().stream().findAny().get(), lastStatesSnapshot.getTime());
     }
 
     public void writeSequenceToFile(String fileName)

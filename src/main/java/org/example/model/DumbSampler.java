@@ -9,26 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DumbSampler extends Sampler {
-//    private final int n;
-//    private final Matrix P;
-    private Integer initialState;
-    private Integer nSteps;
+
     private final List<Integer> sequence = new ArrayList<>();
-//    @JsonIgnore
-//    private ObjectMapper mapper;
 
     public DumbSampler(Matrix P) {
         super(P);
-//        assert (P.rows() == P.columns());
-//
-//        this.n = P.rows();
-//        this.P = P;
-//
-//        mapper = new ObjectMapper();
-//        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-//        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
+    @Override
+    public void reset() {
+        sequence.clear();
+    }
 
     public Integer runForNSteps(int initialState, int nSteps) {
         sequence.add(initialState);

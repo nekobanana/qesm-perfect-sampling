@@ -30,4 +30,8 @@ public class StatesSnapshot {
     State getState(int stateId) {
         return states.get(stateId);
     }
+
+    public Map<Integer, State> getStates() {
+        return states;
+    }
 }
