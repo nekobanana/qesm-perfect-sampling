@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import org.example.model.DumbSampler;
-import org.example.model.PerfectSampler;
+import org.example.model.PerfectSamplerCFTP;
 import org.example.model.PerfectSamplerForward;
 import org.example.model.RunResult;
 import org.jetbrains.annotations.NotNull;
@@ -44,38 +44,45 @@ public class Main {
                 new double[]{0.25, 0.25, 0, 0.5},
                 new double[]{0.5, 0.25, 0.25, 0},
         };
+
+        // Steady state distribution
+
         Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
         System.out.println(solutionSS);
 
         int runs = 10000;
-        List<RunResult> results = new ArrayList<>();
-        PerfectSampler sampler = new PerfectSampler(Matrix.from2DArray(P));
-        RunResult result;
+        List<RunResult> resultsCFTP = new ArrayList<>();
+        PerfectSamplerCFTP samplerCFTP = new PerfectSamplerCFTP(Matrix.from2DArray(P));
+        RunResult resultCFTP;
 
         for (int i = 0; i < runs; i++) {
-            sampler.reset();
-            result = sampler.runUntilCoalescence();
-            results.add(result);
+            samplerCFTP.reset();
+            resultCFTP = samplerCFTP.runUntilCoalescence();
+            resultsCFTP.add(resultCFTP);
         }
 
-        Map<Integer, Long> pi = getDistrFromResults(results, RunResult::getSampledState);
-        pi.forEach((state, count) -> System.out.println("state " + state + ": " + (double)count / runs));
-        float avgSteps = (float) results.stream().mapToInt(RunResult::getSteps).sum() / runs;
-        System.out.println("Avg. steps: " + avgSteps);
-        Map<Integer, Long> hist = getDistrFromResults(results, RunResult::getSteps);
-        hist.forEach((state, count) -> System.out.println("steps: " + state + ", count: " + count));
+        // Perfect sampling CFTP
+
+        System.out.println("\nPerfect sampling (CFTP)");
+        Map<Integer, Long> piCFTP = getDistrFromResults(resultsCFTP, RunResult::getSampledState);
+        piCFTP.forEach((state, count) -> System.out.println("state " + state + ": " + (double)count / runs));
+        float avgStepsCFTP = (float) resultsCFTP.stream().mapToInt(RunResult::getSteps).sum() / runs;
+        System.out.println("Avg. steps: " + avgStepsCFTP);
+        Map<Integer, Long> histCFTP = getDistrFromResults(resultsCFTP, RunResult::getSteps);
+        histCFTP.forEach((state, count) -> System.out.println("steps: " + state + ", count: " + count));
         //        results.forEach(System.out::println);
 
         try {
-            sampler.writeSequenceToFile("postprocess/output_seq.json");
+            samplerCFTP.writeSequenceToFile("postprocess/output_seq.json");
             BufferedWriter writer = new BufferedWriter(new FileWriter("postprocess/results.json"));
-            writer.write((new ObjectMapper()).writeValueAsString(results));
+            writer.write((new ObjectMapper()).writeValueAsString(resultsCFTP));
             writer.close();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+        // Perfect sampling forward
 
         List<RunResult> resultsF = new ArrayList<>();
         PerfectSamplerForward samplerF = new PerfectSamplerForward(Matrix.from2DArray(P));
@@ -87,6 +94,7 @@ public class Main {
             resultsF.add(resultF);
         }
 
+        System.out.println("\nPerfect sampling (forward)");
         Map<Integer, Long> piF = getDistrFromResults(resultsF, RunResult::getSampledState);
         piF.forEach((state, count) -> System.out.println("state " + state + ": " + (double)count / runs));
         float avgStepsF = (float) resultsF.stream().mapToInt(RunResult::getSteps).sum() / runs;
@@ -110,10 +118,11 @@ public class Main {
         for (int i = 0; i < runs; i++) {
             dumbSampler.reset();
             initialState = (initialState + 1) % P.length;
-            resultD = dumbSampler.runForNSteps(initialState, (int)avgSteps + 1);
+            resultD = dumbSampler.runForNSteps(initialState, (int)avgStepsCFTP + 1);
             resultsDumb.add(resultD);
         }
-        System.out.println("Running for " + ((int)avgSteps + 1) + " steps");
+        System.out.println("\nDumb sampling");
+        System.out.println("Running for " + ((int)avgStepsCFTP + 1) + " steps");
         Map<Integer, Long> pi2 = getDistrFromResults(resultsDumb, Function.identity());
         pi2.forEach((state, count) -> System.out.println("state " + state + ": " + (double)count / runs));
 
