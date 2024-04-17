@@ -50,7 +50,7 @@ public class Main {
         Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
         System.out.println(solutionSS);
 
-        int runs = 10000;
+        final int runs = 10000;
         List<RunResult> resultsCFTP = new ArrayList<>();
         PerfectSamplerCFTP samplerCFTP = new PerfectSamplerCFTP(Matrix.from2DArray(P));
         RunResult resultCFTP;
@@ -112,18 +112,19 @@ public class Main {
         }
 
         DumbSampler dumbSampler = new DumbSampler(Matrix.from2DArray(P));
-        List<Integer> resultsDumb = new ArrayList<>();
+        List<Integer> resultsD = new ArrayList<>();
         int resultD;
         int initialState = 0;
+        int stepsD = (int)(Math.min(avgStepsCFTP, avgStepsF)) + 1;
         for (int i = 0; i < runs; i++) {
             dumbSampler.reset();
             initialState = (initialState + 1) % P.length;
-            resultD = dumbSampler.runForNSteps(initialState, (int)avgStepsCFTP + 1);
-            resultsDumb.add(resultD);
+            resultD = dumbSampler.runForNSteps(initialState, stepsD);
+            resultsD.add(resultD);
         }
         System.out.println("\nDumb sampling");
-        System.out.println("Running for " + ((int)avgStepsCFTP + 1) + " steps");
-        Map<Integer, Long> pi2 = getDistrFromResults(resultsDumb, Function.identity());
+        System.out.println("Running for " + stepsD + " steps");
+        Map<Integer, Long> pi2 = getDistrFromResults(resultsD, Function.identity());
         pi2.forEach((state, count) -> System.out.println("state " + state + ": " + (double)count / runs));
 
     }
