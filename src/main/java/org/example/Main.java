@@ -3,11 +3,13 @@ package org.example;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
-import org.example.model.DumbSampler;
-import org.example.model.PerfectSamplerCFTP;
-import org.example.model.PerfectSamplerForward;
-import org.example.model.RunResult;
-import org.jetbrains.annotations.NotNull;
+import org.example.model.generator.DTMCGenerator;
+import org.example.model.generator.Distribution;
+import org.example.model.generator.UniformDistribution;
+import org.example.model.sampler.DumbSampler;
+import org.example.model.sampler.PerfectSamplerCFTP;
+import org.example.model.sampler.PerfectSamplerForward;
+import org.example.model.sampler.RunResult;
 import org.la4j.Matrix;
 import org.oristool.models.gspn.chains.DTMCStationary;
 
@@ -21,14 +23,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static Map<Integer, Double> getSteadyStateDistributionLinearSystem(double[][] P) {
+    public static Map<Integer, Double> getSteadyStateDistributionLinearSystem(Matrix P) {
         MutableValueGraph<Object, Double> graph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
-        Matrix matP = Matrix.from2DArray(P);
-        assert(matP.rows() == matP.columns());
-        int n = matP.rows();
+        assert(P.rows() == P.columns());
+        int n = P.rows();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                graph.putEdgeValue(i, j, matP.get(i, j));
+                graph.putEdgeValue(i, j, P.get(i, j));
             }
         }
         return DTMCStationary.builder().build().apply(graph)
@@ -38,12 +39,14 @@ public class Main {
 
 
     public static void main(String[] args) {
-        double[][] P = new double[][]{
-                new double[]{0, 0.5, 0.25, 0.25},
-                new double[]{0.25, 0, 0.5, 0.25},
-                new double[]{0.25, 0.25, 0, 0.5},
-                new double[]{0.5, 0.25, 0.25, 0},
-        };
+        int N = 16;
+        Distribution edgesNumberDistribution = new UniformDistribution(1, (int)Math.sqrt(N));
+        Distribution edgesLocalityDistribution = new UniformDistribution(-(int)Math.sqrt(N), (int)Math.sqrt(N));
+        double selfLoopProbability = 0.5;
+        long seed = 1;
+
+        DTMCGenerator dtmcGenerator = new DTMCGenerator(seed, N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopProbability);
+        Matrix P = dtmcGenerator.generateDTMCMatrix();
 
         // Steady state distribution
 
@@ -52,7 +55,7 @@ public class Main {
 
         final int runs = 10000;
         List<RunResult> resultsCFTP = new ArrayList<>();
-        PerfectSamplerCFTP samplerCFTP = new PerfectSamplerCFTP(Matrix.from2DArray(P));
+        PerfectSamplerCFTP samplerCFTP = new PerfectSamplerCFTP(P);
         RunResult resultCFTP;
 
         for (int i = 0; i < runs; i++) {
@@ -82,43 +85,14 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        // Perfect sampling forward
-
-        List<RunResult> resultsF = new ArrayList<>();
-        PerfectSamplerForward samplerF = new PerfectSamplerForward(Matrix.from2DArray(P));
-        RunResult resultF;
-
-        for (int i = 0; i < runs; i++) {
-            samplerF.reset();
-            resultF = samplerF.runUntilCoalescence();
-            resultsF.add(resultF);
-        }
-
-        System.out.println("\nPerfect sampling (forward)");
-        Map<Integer, Long> piF = getDistrFromResults(resultsF, RunResult::getSampledState);
-        piF.forEach((state, count) -> System.out.println("state " + state + ": " + (double)count / runs));
-        float avgStepsF = (float) resultsF.stream().mapToInt(RunResult::getSteps).sum() / runs;
-        System.out.println("Avg. steps: " + avgStepsF);
-        Map<Integer, Long> histF = getDistrFromResults(resultsF, RunResult::getSteps);
-        histF.forEach((state, count) -> System.out.println("steps: " + state + ", count: " + count));
-        try {
-            samplerF.writeSequenceToFile("postprocess/output_seq_f.json");
-            BufferedWriter writer = new BufferedWriter(new FileWriter("postprocess/results_f.json"));
-            writer.write((new ObjectMapper()).writeValueAsString(resultsF));
-            writer.close();
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        DumbSampler dumbSampler = new DumbSampler(Matrix.from2DArray(P));
+        DumbSampler dumbSampler = new DumbSampler(P);
         List<Integer> resultsD = new ArrayList<>();
         int resultD;
         int initialState = 0;
-        int stepsD = (int)(Math.min(avgStepsCFTP, avgStepsF)) + 1;
+        int stepsD = (int)avgStepsCFTP + 1;
         for (int i = 0; i < runs; i++) {
             dumbSampler.reset();
-            initialState = (initialState + 1) % P.length;
+            initialState = (initialState + 1) % P.rows();
             resultD = dumbSampler.runForNSteps(initialState, stepsD);
             resultsD.add(resultD);
         }
@@ -129,7 +103,7 @@ public class Main {
 
     }
 
-    private static <T> @NotNull Map<Integer, Long> getDistrFromResults(List<T> results, Function<? super T, Integer>  function) {
+    private static <T> Map<Integer, Long> getDistrFromResults(List<T> results, Function<? super T, Integer>  function) {
         return results.stream().collect(Collectors.groupingBy(function, Collectors.counting()));
     }
 

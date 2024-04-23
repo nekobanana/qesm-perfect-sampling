@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.model.sampler;
 
 import org.la4j.Matrix;
 

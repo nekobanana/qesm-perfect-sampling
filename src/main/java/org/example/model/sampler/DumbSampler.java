@@ -1,9 +1,5 @@
-package org.example.model;
+package org.example.model.sampler;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.la4j.Matrix;
 import java.util.ArrayList;
 import java.util.List;

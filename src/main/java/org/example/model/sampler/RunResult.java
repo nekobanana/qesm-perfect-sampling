@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.model.sampler;
 
 public class RunResult {
     int sampledState;
