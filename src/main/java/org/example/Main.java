@@ -39,14 +39,14 @@ public class Main {
 
 
     public static void main(String[] args) {
-        int N = 16;
+        int N = 10;
         Distribution edgesNumberDistribution = new UniformDistribution(1, (int)Math.sqrt(N));
         Distribution edgesLocalityDistribution = new UniformDistribution(-(int)Math.sqrt(N), (int)Math.sqrt(N));
-        double selfLoopProbability = 0.5;
+        double selfLoopProbability = 0.;
         long seed = 1;
 
         DTMCGenerator dtmcGenerator = new DTMCGenerator(seed, N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopProbability);
-        Matrix P = dtmcGenerator.generateDTMCMatrix();
+        Matrix P = dtmcGenerator.getMatrix();
 
         // Steady state distribution
 

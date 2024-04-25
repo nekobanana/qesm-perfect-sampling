@@ -3,6 +3,7 @@ package org.example.model.generator;
 import org.la4j.Matrix;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DTMCGenerator {
@@ -29,10 +30,41 @@ public class DTMCGenerator {
         edgesLocalityDistribution.setSeed(seed);
     }
 
-    public Matrix generateDTMCMatrix() {
+    public Matrix getMatrix() {
+        Matrix P;
+        do {
+            P = generateDTMCMatrix();
+        } while(!isIrreducible(P));
+        forceSelfLoop(P);
+        return P;
+    }
+
+    private boolean isIrreducible(Matrix P) {
+        Tarjan tarjan = new Tarjan(P);
+        List<List<Integer>> scc = tarjan.getComponents();
+        return scc.size() == 1;
+    }
+
+    private void forceSelfLoop(Matrix P) {
+        boolean hasSelfLoop = false;
+        for (int i = 0; i < N; i++) {
+            if (P.get(i, i) != 0) {
+                hasSelfLoop = true;
+                break;
+            }
+        }
+        if (!hasSelfLoop) {
+            P.set(0, 0, Math.random());
+            double sum = P.getRow(0).sum();
+            for (int i = 0; i < N; i++) {
+                P.set(0, i, P.get(0, i) / sum);
+            }
+        }
+    }
+
+    private Matrix generateDTMCMatrix() {
         Matrix P = Matrix.zero(N, N);
         for (int r = 0; r < N; r++) {
-//            Vector row = P.getRow(r);
             int nEdges = edgesNumberDistribution.getSample();
             Map<Integer, Double> sampledEdgesValues = new HashMap<>();
             for (int e = 0; e < nEdges; e++) {
