@@ -9,11 +9,13 @@ import org.example.model.sampling.runner.DumbSampleRunner;
 import org.example.model.sampling.runner.PerfectSampleRunner;
 import org.example.model.sampling.sampler.DumbSampler;
 import org.example.model.sampling.sampler.PerfectSampler;
+import org.example.model.utils.Metrics;
 import org.la4j.Matrix;
 import org.oristool.models.gspn.chains.DTMCStationary;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -33,11 +35,13 @@ public class Main {
 
 
     public static void main(String[] args) {
-        int N = 10;
+        int N = 16;
         Distribution edgesNumberDistribution = new UniformDistribution(1, (int)Math.sqrt(N));
         Distribution edgesLocalityDistribution = new UniformDistribution(-(int)Math.sqrt(N), (int)Math.sqrt(N));
         double selfLoopProbability = 0.;
-        long seed = 1;
+//        long seed = 1;
+        long seed = new Random().nextInt();
+        System.out.println("Seed: " + seed);
 
         DTMCGenerator dtmcGenerator = new DTMCGenerator(seed, N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopProbability);
         Matrix P = dtmcGenerator.getMatrix();
@@ -47,11 +51,13 @@ public class Main {
         Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
         System.out.println(solutionSS);
 
-        final int runs = 10000;
+        final int runs = 100000;
+        System.out.println("Runs: " + runs);
         PerfectSampler samplerCFTP = new PerfectSampler(P);
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
         perfectSampleRunner.run(runs);
-        perfectSampleRunner.getStatesDistribution(true);
+        Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(true);
+        System.out.println("Distance: " + Metrics.distanceL2(solutionSS, piCFTP));
 //        perfectSampleRunner.getStepsDistribution(true);
         try {
             perfectSampleRunner.writeOutputs();
@@ -59,11 +65,12 @@ public class Main {
         }
 
         DumbSampler dumbSampler = new DumbSampler(P);
-        for (int sigma = 1; sigma <= 3; sigma++) {
+        for (int sigma = 0; sigma <= 3; sigma++) {
             DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
                     .steps(perfectSampleRunner.getAvgStepsPlusStdDev(sigma));
             dumbSampleRunner.run(runs);
-            dumbSampleRunner.getStatesDistribution(true);
+            Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(true);
+            System.out.println("Distance: " + Metrics.distanceL2(solutionSS, piDumb));
         }
     }
 
