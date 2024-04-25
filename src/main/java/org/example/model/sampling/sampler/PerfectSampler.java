@@ -1,15 +1,18 @@
-package org.example.model.sampler;
+package org.example.model.sampling.sampler;
 
 import org.la4j.Matrix;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PerfectSamplerCFTP extends PerfectSampler {
+public class PerfectSampler extends Sampler {
 
     private final List<StatesSnapshot> sequence = new ArrayList<>();
 
-    public PerfectSamplerCFTP(Matrix P) {
+    public PerfectSampler(Matrix P) {
         super(P);
     }
 
@@ -63,5 +66,11 @@ public class PerfectSamplerCFTP extends PerfectSampler {
         return new RunResult(lastStatesSnapshot.getState(0).getFlag(), -lastStatesSnapshot.getTime());
     }
 
-
+    public void writeSequenceToFile(String fileName)
+            throws IOException {
+        String json = mapper.writeValueAsString(this);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        writer.write(json);
+        writer.close();
+    }
 }

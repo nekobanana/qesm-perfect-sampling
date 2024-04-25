@@ -1,4 +1,4 @@
-package org.example.model.sampler;
+package org.example.model.sampling.sampler;
 
 import org.la4j.Matrix;
 import java.util.ArrayList;

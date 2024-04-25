@@ -1,4 +1,4 @@
-package org.example.model.sampler;
+package org.example.model.sampling.sampler;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,6 +36,8 @@ public abstract class Sampler {
         }
         throw new RuntimeException("Error generating next state number");
     }
+
+    public int getN() {return n;}
 
     abstract public void reset();
 }

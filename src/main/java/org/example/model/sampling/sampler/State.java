@@ -1,4 +1,4 @@
-package org.example.model.sampler;
+package org.example.model.sampling.sampler;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
