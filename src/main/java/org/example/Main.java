@@ -43,6 +43,7 @@ public class Main {
         long seed = new Random().nextInt();
         System.out.println("Seed: " + seed);
 
+        System.out.println("Generating matrix...");
         DTMCGenerator dtmcGenerator = new DTMCGenerator(seed, N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopProbability);
         Matrix P = dtmcGenerator.getMatrix();
 
@@ -51,13 +52,13 @@ public class Main {
         Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
         System.out.println(solutionSS);
 
-        final int runs = 100000;
+        final int runs = 100;
         System.out.println("Runs: " + runs);
         PerfectSampler samplerCFTP = new PerfectSampler(P);
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
         perfectSampleRunner.run(runs);
         Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(true);
-        System.out.println("Distance: " + Metrics.distanceL2(solutionSS, piCFTP));
+        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
 //        perfectSampleRunner.getStepsDistribution(true);
         try {
             perfectSampleRunner.writeOutputs();
@@ -70,7 +71,7 @@ public class Main {
                     .steps(perfectSampleRunner.getAvgStepsPlusStdDev(sigma));
             dumbSampleRunner.run(runs);
             Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(true);
-            System.out.println("Distance: " + Metrics.distanceL2(solutionSS, piDumb));
+            System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
         }
     }
 
