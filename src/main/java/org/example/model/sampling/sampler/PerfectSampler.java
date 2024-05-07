@@ -12,7 +12,7 @@ public class PerfectSampler extends Sampler {
 
     private final List<StatesSnapshot> sequence = new ArrayList<>();
 
-    public PerfectSampler(Matrix P, long seed) {
+    public PerfectSampler(Matrix P) {
         super(P);
     }
 

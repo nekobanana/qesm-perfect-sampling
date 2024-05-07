@@ -14,19 +14,28 @@ public class DTMCGenerator {
     // per esempio una gaussiana o una uniforme [-4, +4]) per assegnare per ogni arco verso che nodo va
     private Distribution edgesLocalityDistribution;
     private double selfLoopValue;
+    boolean connectSCC;
 
-    public DTMCGenerator(int n, Distribution edgesNumberDistribution, Distribution edgesLocalityDistribution, double selfLoopProbability) {
+    public DTMCGenerator(int n, Distribution edgesNumberDistribution, Distribution edgesLocalityDistribution,
+                         double selfLoopProbability, boolean connectSCC) {
         N = n;
         this.edgesNumberDistribution = edgesNumberDistribution;
         this.edgesLocalityDistribution = edgesLocalityDistribution;
         this.selfLoopValue = selfLoopProbability;
+        this.connectSCC = connectSCC;
     }
 
     public Matrix getMatrix() {
         Matrix P;
-        do {
+        if (connectSCC) {
             P = generateDTMCMatrix();
-        } while(!isIrreducible(P));
+            forceIrreducible(P);
+        }
+        else {
+            do {
+                P = generateDTMCMatrix();
+            } while (!isIrreducible(P));
+        }
         forceSelfLoop(P);
         return P;
     }
@@ -35,6 +44,29 @@ public class DTMCGenerator {
         Tarjan tarjan = new Tarjan(P);
         List<List<Integer>> scc = tarjan.getComponents();
         return scc.size() == 1;
+    }
+
+    private void forceIrreducible(Matrix P) {
+        Tarjan tarjan = new Tarjan(P);
+        List<List<Integer>> scc = tarjan.getComponents();
+        if (scc.size() > 1) {
+            for (int i = 0; i < scc.size(); i++) {
+                List<Integer> component = scc.get(i);
+                List<Integer> nextComponent = scc.get((i + 1) % scc.size());
+                int edgeSource = component.get(rand.nextInt(component.size()));
+                int edgeDest = nextComponent.get(rand.nextInt(nextComponent.size()));
+                P.set(edgeSource, edgeDest, rand.nextDouble());
+                double selfLoopValue = P.get(edgeSource, edgeSource) > 0? this.selfLoopValue : 0;
+                double sum = P.getRow(edgeSource).sum() - P.get(edgeSource, edgeSource);
+                for (int j = 0; j < P.columns(); j++) {
+                    P.set(edgeSource, j, P.get(edgeSource, j) / sum * (1 - selfLoopValue));
+                }
+                P.set(edgeSource, edgeSource, selfLoopValue);
+            }
+        }
+        if (!isIrreducible(P)) {
+            throw new RuntimeException("Generated matrix is not irreducible");
+        }
     }
 
     private void forceSelfLoop(Matrix P) {
@@ -81,7 +113,10 @@ public class DTMCGenerator {
             for (Map.Entry<Integer, Double> entry : sampledEdgesValues.entrySet()) {
                 P.set(r, entry.getKey(), entry.getValue() / valuesSum * (1 - selfLoopValueIfPresent));
             }
-            P.set(r, r, selfLoopValueIfPresent);
+            if (P.getRow(r).sum() > 0)
+                P.set(r, r, selfLoopValueIfPresent);
+            else
+                P.set(r, r, 1);
         }
         return P;
     }

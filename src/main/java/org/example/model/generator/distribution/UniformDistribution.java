@@ -19,7 +19,7 @@ public class UniformDistribution implements Distribution {
 
     @Override
     public int getSample() {
-        return (int)(random.nextFloat() * (max + 1 - min) + min);
+        return random.nextInt(max + 1 - min) + min;
     }
 
     int getIntervalLength() {

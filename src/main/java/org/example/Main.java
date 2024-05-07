@@ -54,7 +54,7 @@ public class Main {
         RandomUtils.rand.setSeed(seed);
 //        Random random = RandomUtils.rand;
         System.out.println("Generating matrix...");
-        DTMCGenerator dtmcGenerator = new DTMCGenerator(N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopValue);
+        DTMCGenerator dtmcGenerator = new DTMCGenerator(N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopValue, true);
         Matrix P = dtmcGenerator.getMatrix();
 
         // Steady state distribution
@@ -62,28 +62,28 @@ public class Main {
         Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
         System.out.println(solutionSS);
 
-//        final int runs = 10000;
-//        System.out.println("Runs: " + runs);
-//        PerfectSampler samplerCFTP = new PerfectSampler(P, random.nextLong());
-//        PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
-//        perfectSampleRunner.run(runs);
-//        Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
-//        System.out.println("\nPerfect sampling: ");
-//        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
-////        perfectSampleRunner.getStepsDistribution(true);
-//        try {
-//            perfectSampleRunner.writeOutputs();
-//        } catch (IOException e) {
-//        }
-//
-//        DumbSampler dumbSampler = new DumbSampler(P, random.nextLong());
-//        for (int sigma = 0; sigma <= 3; sigma++) {
-//            DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
-//                    .steps(perfectSampleRunner.getAvgStepsPlusStdDev(sigma));
-//            dumbSampleRunner.run(runs);
-//            Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
-//            System.out.println("\nDumb sampling (" + sigma + " sigma): ");
-//            System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
-//        }
+        final int runs = 10000;
+        System.out.println("Runs: " + runs);
+        PerfectSampler samplerCFTP = new PerfectSampler(P);
+        PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
+        perfectSampleRunner.run(runs);
+        Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(true);
+        System.out.println("\nPerfect sampling: ");
+        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+//        perfectSampleRunner.getStepsDistribution(true);
+        try {
+            perfectSampleRunner.writeOutputs();
+        } catch (IOException e) {
+        }
+
+        DumbSampler dumbSampler = new DumbSampler(P);
+        for (int sigma = 0; sigma <= 3; sigma++) {
+            DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
+                    .steps(perfectSampleRunner.getAvgStepsPlusStdDev(sigma));
+            dumbSampleRunner.run(runs);
+            Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
+            System.out.println("\nDumb sampling (" + sigma + " sigma): ");
+            System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
+        }
     }
 }
