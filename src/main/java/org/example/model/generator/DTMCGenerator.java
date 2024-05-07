@@ -1,33 +1,25 @@
 package org.example.model.generator;
 
+import org.example.model.generator.distribution.Distribution;
+import org.example.model.utils.RandomUtils;
 import org.la4j.Matrix;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DTMCGenerator {
-    long seed;
-    int N;
-    Distribution edgesNumberDistribution;
+    final private Random rand = RandomUtils.rand;
+    private int N;
+    private Distribution edgesNumberDistribution;
     // una volta campionato in numero di archi uscenti uso edgesLocalityDistribution (che potrebbe essere
     // per esempio una gaussiana o una uniforme [-4, +4]) per assegnare per ogni arco verso che nodo va
-    Distribution edgesLocalityDistribution;
-    // probabilità di self loop, da tenere in considerazione per edgesNumberDistribution o è a sé? (semprerebbe a sé)
-    double selfLoopProbability;
+    private Distribution edgesLocalityDistribution;
+    private double selfLoopValue;
 
-    // manca una distribuzione per i valori degli archi?
-
-
-    // forse da rifare col builder?
-    public DTMCGenerator(long seed, int n, Distribution edgesNumberDistribution, Distribution edgesLocalityDistribution, double selfLoopProbability) {
-        this.seed = seed;
+    public DTMCGenerator(int n, Distribution edgesNumberDistribution, Distribution edgesLocalityDistribution, double selfLoopProbability) {
         N = n;
         this.edgesNumberDistribution = edgesNumberDistribution;
         this.edgesLocalityDistribution = edgesLocalityDistribution;
-        this.selfLoopProbability = selfLoopProbability;
-        edgesNumberDistribution.setSeed(seed);
-        edgesLocalityDistribution.setSeed(seed);
+        this.selfLoopValue = selfLoopProbability;
     }
 
     public Matrix getMatrix() {
@@ -54,7 +46,8 @@ public class DTMCGenerator {
             }
         }
         if (!hasSelfLoop) {
-            P.set(0, 0, Math.random());
+            P.set(0, 0, rand.nextDouble());
+//            Log.logger.info("P.set(0, 0, rand.nextDouble()) = " + P.get(0, 0));
             double sum = P.getRow(0).sum();
             for (int i = 0; i < N; i++) {
                 P.set(0, i, P.get(0, i) / sum);
@@ -66,22 +59,29 @@ public class DTMCGenerator {
         Matrix P = Matrix.zero(N, N);
         for (int r = 0; r < N; r++) {
             int nEdges = edgesNumberDistribution.getSample();
+//            Log.logger.info("edgesNumberDistribution.getSample() = " + nEdges);
             Map<Integer, Double> sampledEdgesValues = new HashMap<>();
             for (int e = 0; e < nEdges; e++) {
                 int destNode;
                 do {
                     destNode = (r + edgesLocalityDistribution.getSample() + N) % N;
-                } while (destNode == r || sampledEdgesValues.containsKey(destNode));
-                sampledEdgesValues.put(destNode, Math.random());
+//                    Log.logger.info("edgesLocalityDistribution.getSample() = " + destNode);
+                } while (sampledEdgesValues.containsKey(destNode));
+                if (destNode == r) {
+                    sampledEdgesValues.put(destNode, selfLoopValue);
+                }
+                else {
+                    sampledEdgesValues.put(destNode, rand.nextDouble());
+//                    Log.logger.info("edgesLocalityDistribution.getSample() = " + sampledEdgesValues.get(destNode));
+                }
             }
-            boolean selfLoop = Math.random() < selfLoopProbability;
-            if (selfLoop) {
-                sampledEdgesValues.put(r, Math.random());
-            }
+            double selfLoopValueIfPresent = sampledEdgesValues.getOrDefault(r, 0.);
+            sampledEdgesValues.remove(r);
             double valuesSum = sampledEdgesValues.values().stream().reduce(0., Double::sum);
             for (Map.Entry<Integer, Double> entry : sampledEdgesValues.entrySet()) {
-                P.set(r, entry.getKey(), entry.getValue() / valuesSum);
+                P.set(r, entry.getKey(), entry.getValue() / valuesSum * (1 - selfLoopValueIfPresent));
             }
+            P.set(r, r, selfLoopValueIfPresent);
         }
         return P;
     }

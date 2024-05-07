@@ -12,6 +12,7 @@ public class DumbSampler extends Sampler {
         super(P);
     }
 
+
     @Override
     public void reset() {
         sequence.clear();

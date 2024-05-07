@@ -1,11 +1,13 @@
-package org.example.model.generator;
+package org.example.model.generator.distribution;
+
+import org.example.model.utils.RandomUtils;
 
 import java.util.Random;
 
 public class UniformDistribution implements Distribution {
-    Random random = new Random();
-    int min;
-    int max;
+    private final Random random = RandomUtils.rand;
+    final int min;
+    final int max; // incluso
     public UniformDistribution(int min, int max) {
         this.min = min;
         this.max = max;
@@ -17,6 +19,10 @@ public class UniformDistribution implements Distribution {
 
     @Override
     public int getSample() {
-        return (int)(random.nextFloat() * (max - min) + min);
+        return (int)(random.nextFloat() * (max + 1 - min) + min);
+    }
+
+    int getIntervalLength() {
+        return max - min + 1;
     }
 }

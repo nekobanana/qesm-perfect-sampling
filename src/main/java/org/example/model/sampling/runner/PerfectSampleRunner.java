@@ -41,7 +41,7 @@ public class PerfectSampleRunner implements SamplerRunner {
         if (print) {
             System.out.println("\nPerfect sampling");
             pi.forEach((state, count) ->
-                    System.out.println("state " + state + ": " + (double)count));
+                    System.out.println("state " + state + ": " + count));
         }
         return pi;
     }
