@@ -1,14 +1,25 @@
 package org.example.model.generator.distribution;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.example.model.utils.RandomUtils;
 
 import java.util.Random;
 
+@JsonDeserialize(as = UniformDistribution.class)
 public class UniformDistribution implements Distribution {
     private final Random random = RandomUtils.rand;
     final int min;
     final int max; // incluso
-    public UniformDistribution(int min, int max) {
+
+    /**
+     * @param min included
+     * @param max included
+     */
+    @JsonCreator
+    public UniformDistribution(@JsonProperty("min") int min, @JsonProperty("max") int max) {
         this.min = min;
         this.max = max;
     }
@@ -17,6 +28,7 @@ public class UniformDistribution implements Distribution {
         random.setSeed(seed);
     }
 
+    @JsonIgnore
     @Override
     public int getSample() {
         return random.nextInt(max + 1 - min) + min;
@@ -24,5 +36,13 @@ public class UniformDistribution implements Distribution {
 
     int getIntervalLength() {
         return max - min + 1;
+    }
+
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
     }
 }

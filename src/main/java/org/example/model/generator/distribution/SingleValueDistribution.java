@@ -1,8 +1,15 @@
 package org.example.model.generator.distribution;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(as = SingleValueDistribution.class)
 public class SingleValueDistribution extends UniformDistribution {
     private final int n;
-    public SingleValueDistribution(int n) {
+
+    @JsonCreator
+    public SingleValueDistribution(@JsonProperty("n") int n) {
         super(n, n);
         this.n = n;
     }
@@ -11,6 +18,10 @@ public class SingleValueDistribution extends UniformDistribution {
 
     @Override
     public int getSample() {
+        return n;
+    }
+
+    public int getN() {
         return n;
     }
 }

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public abstract class Sampler {
     protected final int n;
     protected final Matrix P;
+    @JsonIgnore
     protected Random rand;
     @JsonIgnore
     protected ObjectMapper mapper;

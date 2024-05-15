@@ -1,5 +1,8 @@
 package org.example.model.generator.distribution;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.example.model.utils.RandomUtils;
 
 import java.util.ArrayList;
@@ -8,12 +11,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+@JsonDeserialize(as = ManualDistribution.class)
 public class ManualDistribution implements Distribution {
     private final Random rand = RandomUtils.rand;
     private final List<UniformDistribution> distributions;
     private final List<Double> distributionsProbabilities;
 
-    private ManualDistribution(List<UniformDistribution> distributions, List<Double> distributionsProbabilities) {
+    @JsonCreator
+    private ManualDistribution(
+            @JsonProperty("distributions") List<UniformDistribution> distributions,
+            @JsonProperty("distributionsProbabilities") List<Double> distributionsProbabilities) {
         this.distributions = distributions.stream()
                 .map(d -> new UniformDistribution(d.min, d.max)).collect(Collectors.toList());
         this.distributionsProbabilities = new ArrayList<>(distributionsProbabilities);
@@ -22,6 +29,16 @@ public class ManualDistribution implements Distribution {
     @Override
     public void setSeed(long seed) {
         rand.setSeed(seed);
+    }
+
+    public List<UniformDistribution> getDistributions() {
+        // copy
+        return distributions.stream().map(d -> new UniformDistribution(d.min, d.max)).collect(Collectors.toList());
+    }
+
+    public List<Double> getDistributionsProbabilities() {
+        // da verificare se è deep
+        return new ArrayList<>(distributionsProbabilities);
     }
 
     @Override
