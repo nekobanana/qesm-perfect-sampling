@@ -58,14 +58,22 @@ public class PerfectSampleRunner implements SamplerRunner {
     }
 
     public int getAvgStepsPlusStdDev(int sigmaCount) {
+        return (int) Math.round(getAvgSteps() + sigmaCount * getStdDevSteps());
+    }
+
+    public Float getAvgSteps() {
         if (avgSteps == null) {
             avgSteps = (float) results.stream().mapToInt(RunResult::getSteps).sum() / results.size();
         }
+        return avgSteps;
+    }
+
+    public Double getStdDevSteps() {
         if (stdDevSteps == null) {
             stdDevSteps = Math.sqrt(results.stream()
                     .mapToDouble((r) -> Math.pow(r.getSteps() - avgSteps, 2)).sum()) / avgSteps;
         }
-        return (int) Math.round(avgSteps + sigmaCount * stdDevSteps);
+        return stdDevSteps;
     }
 
     public void writeOutputs() throws IOException {

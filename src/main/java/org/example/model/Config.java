@@ -1,4 +1,4 @@
-package org.example;
+package org.example.model;
 
 import org.example.model.generator.distribution.Distribution;
 
@@ -7,7 +7,8 @@ public class Config {
     private Distribution edgesNumberDistribution;
     private Distribution edgesLocalityDistribution;
     private double selfLoopValue;
-    private long seed;
+    private Long seed;
+    private int run;
 
     public int getN() {
         return N;
@@ -41,11 +42,19 @@ public class Config {
         this.selfLoopValue = selfLoopValue;
     }
 
-    public long getSeed() {
+    public Long getSeed() {
         return seed;
     }
 
-    public void setSeed(long seed) {
+    public void setSeed(Long seed) {
         this.seed = seed;
+    }
+
+    public int getRun() {
+        return run;
+    }
+
+    public void setRun(int run) {
+        this.run = run;
     }
 }

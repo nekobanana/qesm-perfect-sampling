@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import org.apache.commons.cli.*;
+import org.example.model.Config;
+import org.example.model.Output;
 import org.example.model.generator.DTMCGenerator;
 import org.example.model.generator.distribution.Distribution;
 import org.example.model.generator.distribution.ManualDistribution;
@@ -13,7 +15,6 @@ import org.example.model.sampling.runner.DumbSampleRunner;
 import org.example.model.sampling.runner.PerfectSampleRunner;
 import org.example.model.sampling.sampler.DumbSampler;
 import org.example.model.sampling.sampler.PerfectSampler;
-import org.example.model.utils.Log;
 import org.example.model.utils.Metrics;
 import org.example.model.utils.RandomUtils;
 import org.la4j.Matrix;
@@ -23,13 +24,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static Map<Integer, Double> getSteadyStateDistributionLinearSystem(Matrix P) {
+    public static Map<Integer, Double> getSteadyStateDistributionOris(Matrix P) {
         MutableValueGraph<Object, Double> graph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
         assert(P.rows() == P.columns());
         int n = P.rows();
@@ -91,8 +91,6 @@ public class Main {
 
     public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile, Long seedValue) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
-            long seed = new Random().nextInt();
-//            long seed = 1;
             int N = 16;
             Distribution edgesNumberDistribution = new UniformDistribution(4, 4);
             Distribution edgesLocalityDistribution = ManualDistribution.ManualDistributionBuilder.newBuilder()
@@ -108,25 +106,31 @@ public class Main {
             config.setEdgesNumberDistribution(edgesNumberDistribution);
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.setSelfLoopValue(selfLoopValue);
-            config.setSeed(seed);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(configOutputFile));
-            writer.write(new ObjectMapper().writeValueAsString(config));
-            writer.close();
+            writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
             Config config = new ObjectMapper().readValue(new File(inputFilePath), Config.class);
-            runExperiment(config);
+            Output output = runExperiment(config);
+            writeFile(output, outputFilePath);
         }
     }
 
-    public static void runExperiment(Config configuration) {
+    public static Output runExperiment(Config configuration) {
 
         int N = configuration.getN();
         Distribution edgesNumberDistribution = configuration.getEdgesNumberDistribution();
         Distribution edgesLocalityDistribution = configuration.getEdgesLocalityDistribution();
 
         double selfLoopValue = configuration.getSelfLoopValue();
-        long seed = configuration.getSeed();
+        long seed;
+        if (configuration.getSeed() != null) {
+            seed = configuration.getSeed();
+        }
+        else {
+            seed = new Random().nextInt();
+            configuration.setSeed(seed);
+        }
+
         System.out.println("Seed: " + seed);
         RandomUtils.rand.setSeed(seed);
         System.out.println("Generating matrix...");
@@ -135,32 +139,57 @@ public class Main {
 
         // Steady state distribution
 
-        Map<Integer, Double> solutionSS = getSteadyStateDistributionLinearSystem(P);
+        Map<Integer, Double> solutionSS = getSteadyStateDistributionOris(P);
         System.out.println(solutionSS);
 
-        final int runs = 1;
+        Output output = new Output();
+        output.setConfig(configuration);
+
+        // Perfect Sampling
+
+        final int runs = configuration.getRun();
         System.out.println("Runs: " + runs);
         PerfectSampler samplerCFTP = new PerfectSampler(P);
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
         perfectSampleRunner.run(runs);
         Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
-        System.out.println("\nPerfect sampling: ");
-        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+//        System.out.println("\nPerfect sampling: ");
+//        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
 //        perfectSampleRunner.getStepsDistribution(true);
         try {
             perfectSampleRunner.writeOutputs();
         } catch (IOException e) {
-            System.out.println("Cannot write output file");
+            System.out.println("Cannot write Perfect sampling output file");
         }
+        Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
+        psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());
+        psOutput.setSigma(perfectSampleRunner.getStdDevSteps());
+        psOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+        output.setPerfectSamplingOutput(psOutput);
+
+        //Dumb Sampling
 
         DumbSampler dumbSampler = new DumbSampler(P);
         for (int sigma = 0; sigma <= 3; sigma++) {
+            int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);
             DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
-                    .steps(perfectSampleRunner.getAvgStepsPlusStdDev(sigma));
+                    .steps(nSteps);
             dumbSampleRunner.run(runs);
             Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
             System.out.println("\nDumb sampling (" + sigma + " sigma): ");
             System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
+            Output.DumbSamplingOutput dsOutput = new Output.DumbSamplingOutput();
+            dsOutput.setSteps(nSteps);
+            dsOutput.setSigmas(sigma);
+            dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
+            output.getDumbSamplingOutputs().add(dsOutput);
         }
+        return output;
+    }
+
+    public static void writeFile(Object object, String fileName) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        writer.write(new ObjectMapper().writeValueAsString(object));
+        writer.close();
     }
 }
