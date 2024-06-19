@@ -1,4 +1,4 @@
-package org.example.model.sampling.runner;
+package org.qesm.app.model.sampling.runner;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.example.model.utils;
+package org.qesm.app.model.utils;
 
 import java.util.List;
 import java.util.Random;
@@ -34,25 +34,25 @@ public class RandomUtils {
         @Override
         public int nextInt() {
             int v = super.nextInt();
-            Log.logger.info(this + " nextInt() = " + v);
+//            Log.logger.info(this + " nextInt() = " + v);
             return v;
         }
         @Override
         public long nextLong() {
             long v = super.nextLong();
-            Log.logger.info(this + " nextLong() = " + v);
+//            Log.logger.info(this + " nextLong() = " + v);
             return v;
         }
         @Override
         public double nextDouble() {
             double v = super.nextDouble();
-            Log.logger.info(this + " nextDouble() = " + v);
+//            Log.logger.info(this + " nextDouble() = " + v);
             return v;
         }
         @Override
         public float nextFloat() {
             float v = super.nextFloat();
-            Log.logger.info(this + " nextFloat() = " + v);
+//            Log.logger.info(this + " nextFloat() = " + v);
             return v;
         }
     }

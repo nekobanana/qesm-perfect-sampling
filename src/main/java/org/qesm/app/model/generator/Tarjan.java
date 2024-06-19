@@ -1,4 +1,4 @@
-package org.example.model.generator;
+package org.qesm.app.model.generator;
 
 import org.la4j.Matrix;
 

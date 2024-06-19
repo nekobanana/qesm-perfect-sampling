@@ -1,6 +1,6 @@
-package org.example.model.sampling.runner;
+package org.qesm.app.model.sampling.runner;
 
-import org.example.model.sampling.sampler.DumbSampler;
+import org.qesm.app.model.sampling.sampler.DumbSampler;
 
 import java.util.ArrayList;
 import java.util.List;

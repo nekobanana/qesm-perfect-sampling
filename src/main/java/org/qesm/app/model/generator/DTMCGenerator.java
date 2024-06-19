@@ -1,7 +1,7 @@
-package org.example.model.generator;
+package org.qesm.app.model.generator;
 
-import org.example.model.generator.distribution.Distribution;
-import org.example.model.utils.RandomUtils;
+import org.qesm.app.model.generator.distribution.Distribution;
+import org.qesm.app.model.utils.RandomUtils;
 import org.la4j.Matrix;
 
 import java.util.*;

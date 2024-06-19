@@ -1,4 +1,4 @@
-package org.example.model.generator.distribution;
+package org.qesm.app.model.generator.distribution;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

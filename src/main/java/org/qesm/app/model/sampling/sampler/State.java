@@ -1,4 +1,4 @@
-package org.example.model.sampling.sampler;
+package org.qesm.app.model.sampling.sampler;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

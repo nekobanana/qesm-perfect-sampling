@@ -1,22 +1,22 @@
-package org.example;
+package org.qesm.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import org.apache.commons.cli.*;
-import org.example.model.Config;
-import org.example.model.Output;
-import org.example.model.generator.DTMCGenerator;
-import org.example.model.generator.distribution.Distribution;
-import org.example.model.generator.distribution.ManualDistribution;
-import org.example.model.generator.distribution.SingleValueDistribution;
-import org.example.model.generator.distribution.UniformDistribution;
-import org.example.model.sampling.runner.DumbSampleRunner;
-import org.example.model.sampling.runner.PerfectSampleRunner;
-import org.example.model.sampling.sampler.DumbSampler;
-import org.example.model.sampling.sampler.PerfectSampler;
-import org.example.model.utils.Metrics;
-import org.example.model.utils.RandomUtils;
+import org.qesm.app.model.Config;
+import org.qesm.app.model.Output;
+import org.qesm.app.model.generator.DTMCGenerator;
+import org.qesm.app.model.generator.distribution.Distribution;
+import org.qesm.app.model.generator.distribution.ManualDistribution;
+import org.qesm.app.model.generator.distribution.SingleValueDistribution;
+import org.qesm.app.model.generator.distribution.UniformDistribution;
+import org.qesm.app.model.sampling.runner.DumbSampleRunner;
+import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
+import org.qesm.app.model.sampling.sampler.DumbSampler;
+import org.qesm.app.model.sampling.sampler.PerfectSampler;
+import org.qesm.app.model.utils.Metrics;
+import org.qesm.app.model.utils.RandomUtils;
 import org.la4j.Matrix;
 import org.oristool.models.gspn.chains.DTMCStationary;
 
@@ -64,6 +64,11 @@ public class Main {
         seed.setType(Long.class);
         options.addOption(seed);
 
+        Option postProcess = new Option("post", "post", false, "generate output for post process");
+        postProcess.setRequired(false);
+        postProcess.setType(Boolean.class);
+        options.addOption(postProcess);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
@@ -79,7 +84,9 @@ public class Main {
             String outputFilePath = cmd.getOptionValue("output");
             String configFilePath = cmd.getOptionValue("config");
             Long seedValue = cmd.getParsedOptionValue("seed");
-            configExperiment(inputFilePath, outputFilePath, configFilePath, seedValue);
+            Boolean genPostProcessOutput = cmd.getParsedOptionValue("post");
+            if (genPostProcessOutput == null) genPostProcessOutput = false;
+            configExperiment(inputFilePath, outputFilePath, configFilePath, genPostProcessOutput);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("perfect-sampling", options);
@@ -89,10 +96,11 @@ public class Main {
         }
     }
 
-    public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile, Long seedValue) throws IOException {
+    public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile, boolean genPostProcessOutput) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
             int N = 16;
-            Distribution edgesNumberDistribution = new UniformDistribution(4, 4);
+            int runs = 1600;
+            Distribution edgesNumberDistribution = new SingleValueDistribution( 4);
             Distribution edgesLocalityDistribution = ManualDistribution.ManualDistributionBuilder.newBuilder()
                     .distribution(new UniformDistribution(-2, -1), 1)
                     .distribution(new SingleValueDistribution(0), 2)
@@ -103,6 +111,7 @@ public class Main {
 
             Config config = new Config();
             config.setN(N);
+            config.setRun(runs);
             config.setEdgesNumberDistribution(edgesNumberDistribution);
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.setSelfLoopValue(selfLoopValue);
@@ -110,12 +119,12 @@ public class Main {
         }
         else { // load config file and start experiment
             Config config = new ObjectMapper().readValue(new File(inputFilePath), Config.class);
-            Output output = runExperiment(config);
+            Output output = runExperiment(config, genPostProcessOutput);
             writeFile(output, outputFilePath);
         }
     }
 
-    public static Output runExperiment(Config configuration) {
+    public static Output runExperiment(Config configuration, boolean genPostProcessOutput) {
 
         int N = configuration.getN();
         Distribution edgesNumberDistribution = configuration.getEdgesNumberDistribution();
@@ -156,10 +165,12 @@ public class Main {
 //        System.out.println("\nPerfect sampling: ");
 //        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
 //        perfectSampleRunner.getStepsDistribution(true);
-        try {
-            perfectSampleRunner.writeOutputs();
-        } catch (IOException e) {
-            System.out.println("Cannot write Perfect sampling output file");
+        if (genPostProcessOutput) {
+            try {
+                perfectSampleRunner.writeOutputs();
+            } catch (IOException e) {
+                System.out.println("Cannot write Perfect sampling output file");
+            }
         }
         Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
         psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());

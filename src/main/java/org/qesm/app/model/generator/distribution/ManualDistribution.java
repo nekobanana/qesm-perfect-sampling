@@ -1,9 +1,9 @@
-package org.example.model.generator.distribution;
+package org.qesm.app.model.generator.distribution;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.example.model.utils.RandomUtils;
+import org.qesm.app.model.utils.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

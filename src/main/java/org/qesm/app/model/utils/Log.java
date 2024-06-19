@@ -1,4 +1,4 @@
-package org.example.model.utils;
+package org.qesm.app.model.utils;
 
 import java.io.IOException;
 import java.util.logging.*;
@@ -20,7 +20,5 @@ public class Log {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        logger.info("Hi How r u?");
     }
 }

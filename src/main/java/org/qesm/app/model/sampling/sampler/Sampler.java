@@ -1,15 +1,12 @@
-package org.example.model.sampling.sampler;
+package org.qesm.app.model.sampling.sampler;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
-import org.example.model.utils.RandomUtils;
+import org.qesm.app.model.utils.RandomUtils;
 import org.la4j.Matrix;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;

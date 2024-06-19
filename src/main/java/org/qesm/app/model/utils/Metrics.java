@@ -1,4 +1,4 @@
-package org.example.model.utils;
+package org.qesm.app.model.utils;
 
 import java.util.Map;
 

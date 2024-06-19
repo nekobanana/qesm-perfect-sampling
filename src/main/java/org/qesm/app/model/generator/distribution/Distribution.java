@@ -1,4 +1,4 @@
-package org.example.model.generator.distribution;
+package org.qesm.app.model.generator.distribution;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

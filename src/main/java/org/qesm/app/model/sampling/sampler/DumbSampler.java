@@ -1,4 +1,4 @@
-package org.example.model.sampling.sampler;
+package org.qesm.app.model.sampling.sampler;
 
 import org.la4j.Matrix;
 import java.util.ArrayList;

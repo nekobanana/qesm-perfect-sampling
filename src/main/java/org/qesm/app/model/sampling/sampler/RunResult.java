@@ -1,4 +1,4 @@
-package org.example.model.sampling.sampler;
+package org.qesm.app.model.sampling.sampler;
 
 public class RunResult {
     int sampledState;

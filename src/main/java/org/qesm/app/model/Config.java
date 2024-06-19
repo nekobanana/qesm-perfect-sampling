@@ -1,6 +1,6 @@
-package org.example.model;
+package org.qesm.app.model;
 
-import org.example.model.generator.distribution.Distribution;
+import org.qesm.app.model.generator.distribution.Distribution;
 
 public class Config {
     private int N;

@@ -1,12 +1,14 @@
-package org.example.model.sampling.runner;
+package org.qesm.app.model.sampling.runner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.model.sampling.sampler.PerfectSampler;
-import org.example.model.sampling.sampler.RunResult;
+import org.qesm.app.model.sampling.sampler.PerfectSampler;
+import org.qesm.app.model.sampling.sampler.RunResult;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,10 +79,10 @@ public class PerfectSampleRunner implements SamplerRunner {
     }
 
     public void writeOutputs() throws IOException {
+        Files.createDirectories(Paths.get("postprocess"));
         sampler.writeSequenceToFile("postprocess/output_seq.json");
         BufferedWriter writer = new BufferedWriter(new FileWriter("postprocess/results.json"));
         writer.write((new ObjectMapper()).writeValueAsString(results));
         writer.close();
-
     }
 }
