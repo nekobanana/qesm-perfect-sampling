@@ -91,6 +91,9 @@ public class DTMCGenerator {
         if (!checkDistributionsCompatibility()) {
             throw new RuntimeException("Input distributions should be compatible");
         }
+        if (!checkSelfLoopCompatibility()) {
+            throw new RuntimeException("Self loop value should be less than 1");
+        }
         Matrix P = Matrix.zero(N, N);
         for (int r = 0; r < N; r++) {
             int nEdges = edgesNumberDistribution.getSample();
@@ -125,7 +128,13 @@ public class DTMCGenerator {
     }
 
     private boolean checkDistributionsCompatibility() {
-        return edgesNumberDistribution.getMin() <= edgesLocalityDistribution.getIntervalLength();
+        return edgesNumberDistribution.getMin() <= Math.min(edgesLocalityDistribution.getIntervalLength(), N);
+        // non tiene conto di cose strane che potrebbero succedere nella ManualDistribution,
+        // tipo intervalli che si sovrappongono
+    }
+
+    private boolean checkSelfLoopCompatibility() {
+        return selfLoopValue >= 0 && selfLoopValue < 1;
     }
 
 }

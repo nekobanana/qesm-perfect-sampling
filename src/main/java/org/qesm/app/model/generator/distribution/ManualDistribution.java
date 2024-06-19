@@ -50,12 +50,17 @@ public class ManualDistribution implements Distribution {
 
     @Override
     public int getMin() {
-        return distributions.stream().map(UniformDistribution::getMin).min(Integer::compareTo).get();
+        return distributions.stream().map(Distribution::getMin).min(Integer::compareTo).get();
     }
 
     @Override
     public int getMax() {
-        return distributions.stream().map(UniformDistribution::getMin).max(Integer::compareTo).get();
+        return distributions.stream().map(Distribution::getMin).max(Integer::compareTo).get();
+    }
+
+    @Override
+    public int getIntervalLength() {
+        return distributions.stream().map(Distribution::getIntervalLength).reduce(0, Integer::sum);
     }
 
     public static class ManualDistributionBuilder {

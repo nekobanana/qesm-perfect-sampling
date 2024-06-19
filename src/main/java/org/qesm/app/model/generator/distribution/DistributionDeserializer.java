@@ -14,13 +14,6 @@ public class DistributionDeserializer extends JsonDeserializer<Distribution> {
         ObjectMapper mapper = (ObjectMapper) jp.getCodec();
         ObjectNode root = mapper.readTree(jp);
 
-        /*write your own condition*/
-//        if (root.get("distributionType").asText().equals("UniformDistribution")) {
-//            return mapper.readValue(root.toString(), UniformDistribution.class);
-//        }
-//        else if (root.get("distributionType").asText().equals("ManualDistribution")) {
-//            return mapper.readValue(root.toString(), ManualDistribution.class);
-//        }
         try {
             return (Distribution) mapper.readValue(root.toString(), Class.forName(root.get("distributionType").asText()));
         } catch (ClassNotFoundException e) {
