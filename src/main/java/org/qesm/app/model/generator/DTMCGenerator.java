@@ -88,6 +88,9 @@ public class DTMCGenerator {
     }
 
     private Matrix generateDTMCMatrix() {
+        if (!checkDistributionsCompatibility()) {
+            throw new RuntimeException("Input distributions should be compatible");
+        }
         Matrix P = Matrix.zero(N, N);
         for (int r = 0; r < N; r++) {
             int nEdges = edgesNumberDistribution.getSample();
@@ -119,6 +122,10 @@ public class DTMCGenerator {
                 P.set(r, r, 1);
         }
         return P;
+    }
+
+    private boolean checkDistributionsCompatibility() {
+        return edgesNumberDistribution.getMin() <= edgesLocalityDistribution.getIntervalLength();
     }
 
 }

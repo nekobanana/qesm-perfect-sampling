@@ -59,11 +59,6 @@ public class Main {
         config.setRequired(false);
         options.addOption(config);
 
-        Option seed = new Option("s", "seed", true, "seed for random");
-        seed.setRequired(false);
-        seed.setType(Long.class);
-        options.addOption(seed);
-
         Option postProcess = new Option("post", "post", false, "generate output for post process");
         postProcess.setRequired(false);
         postProcess.setType(Boolean.class);
@@ -83,7 +78,6 @@ public class Main {
             String inputFilePath = cmd.getOptionValue("input");
             String outputFilePath = cmd.getOptionValue("output");
             String configFilePath = cmd.getOptionValue("config");
-            Long seedValue = cmd.getParsedOptionValue("seed");
             Boolean genPostProcessOutput = cmd.getParsedOptionValue("post");
             if (genPostProcessOutput == null) genPostProcessOutput = false;
             configExperiment(inputFilePath, outputFilePath, configFilePath, genPostProcessOutput);
@@ -96,10 +90,12 @@ public class Main {
         }
     }
 
-    public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile, boolean genPostProcessOutput) throws IOException {
+    public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile,
+                                        boolean genPostProcessOutput) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
             int N = 16;
             int runs = 1600;
+            boolean connectSCCs = false;
             Distribution edgesNumberDistribution = new SingleValueDistribution( 4);
             Distribution edgesLocalityDistribution = ManualDistribution.ManualDistributionBuilder.newBuilder()
                     .distribution(new UniformDistribution(-2, -1), 1)
@@ -112,6 +108,7 @@ public class Main {
             Config config = new Config();
             config.setN(N);
             config.setRun(runs);
+            config.setConnectSCCs(connectSCCs);
             config.setEdgesNumberDistribution(edgesNumberDistribution);
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.setSelfLoopValue(selfLoopValue);
@@ -143,7 +140,8 @@ public class Main {
         System.out.println("Seed: " + seed);
         RandomUtils.rand.setSeed(seed);
         System.out.println("Generating matrix...");
-        DTMCGenerator dtmcGenerator = new DTMCGenerator(N, edgesNumberDistribution, edgesLocalityDistribution, selfLoopValue, true);
+        DTMCGenerator dtmcGenerator = new DTMCGenerator(N, edgesNumberDistribution,
+                edgesLocalityDistribution, selfLoopValue, configuration.isConnectSCCs());
         Matrix P = dtmcGenerator.getMatrix();
 
         // Steady state distribution

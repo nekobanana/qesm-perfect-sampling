@@ -9,6 +9,7 @@ public class Config {
     private double selfLoopValue;
     private Long seed;
     private int run;
+    private boolean connectSCCs;
 
     public int getN() {
         return N;
@@ -56,5 +57,12 @@ public class Config {
 
     public void setRun(int run) {
         this.run = run;
+    }
+
+    public boolean isConnectSCCs() {
+        return connectSCCs;
+    }
+    public void setConnectSCCs(boolean connectSCCs) {
+        this.connectSCCs = connectSCCs;
     }
 }

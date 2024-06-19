@@ -21,6 +21,16 @@ public class SingleValueDistribution extends UniformDistribution {
         return n;
     }
 
+    @Override
+    public int getMin() {
+        return n;
+    }
+
+    @Override
+    public int getMax() {
+        return n;
+    }
+
     public int getN() {
         return n;
     }

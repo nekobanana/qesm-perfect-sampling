@@ -48,6 +48,16 @@ public class ManualDistribution implements Distribution {
         return distribution.getSample();
     }
 
+    @Override
+    public int getMin() {
+        return distributions.stream().map(UniformDistribution::getMin).min(Integer::compareTo).get();
+    }
+
+    @Override
+    public int getMax() {
+        return distributions.stream().map(UniformDistribution::getMin).max(Integer::compareTo).get();
+    }
+
     public static class ManualDistributionBuilder {
         private List<UniformDistribution> distributions = new ArrayList<>();
         private List<Double> distributionsWeights = new ArrayList<>();

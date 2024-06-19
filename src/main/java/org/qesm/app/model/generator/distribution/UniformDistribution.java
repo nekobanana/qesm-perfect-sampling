@@ -34,10 +34,7 @@ public class UniformDistribution implements Distribution {
         return random.nextInt(max + 1 - min) + min;
     }
 
-    int getIntervalLength() {
-        return max - min + 1;
-    }
-
+    @Override
     public int getMin() {
         return min;
     }
