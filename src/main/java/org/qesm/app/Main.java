@@ -104,6 +104,7 @@ public class Main {
                     .build();
 //            Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
             double selfLoopValue = 0.4;
+            String description = "";
 
             Config config = new Config();
             config.setN(N);
@@ -112,6 +113,7 @@ public class Main {
             config.setEdgesNumberDistribution(edgesNumberDistribution);
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.setSelfLoopValue(selfLoopValue);
+            config.setDescription(description);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment

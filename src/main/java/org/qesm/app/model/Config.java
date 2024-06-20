@@ -10,6 +10,7 @@ public class Config {
     private Long seed;
     private int run;
     private boolean connectSCCs;
+    private String description;
 
     public int getN() {
         return N;
@@ -64,5 +65,13 @@ public class Config {
     }
     public void setConnectSCCs(boolean connectSCCs) {
         this.connectSCCs = connectSCCs;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

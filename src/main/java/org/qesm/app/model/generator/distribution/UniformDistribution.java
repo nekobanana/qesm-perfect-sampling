@@ -35,10 +35,13 @@ public class UniformDistribution implements Distribution {
     }
 
     @Override
+    @JsonIgnore(value = false)
     public int getMin() {
         return min;
     }
 
+    @Override
+    @JsonIgnore(value = false)
     public int getMax() {
         return max;
     }

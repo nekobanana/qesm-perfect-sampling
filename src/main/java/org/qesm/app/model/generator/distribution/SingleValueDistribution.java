@@ -1,6 +1,7 @@
 package org.qesm.app.model.generator.distribution;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -21,11 +22,13 @@ public class SingleValueDistribution extends UniformDistribution {
         return n;
     }
 
+    @JsonIgnore
     @Override
     public int getMin() {
         return n;
     }
 
+    @JsonIgnore
     @Override
     public int getMax() {
         return n;
