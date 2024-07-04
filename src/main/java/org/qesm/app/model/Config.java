@@ -6,9 +6,11 @@ public class Config {
     private int N;
     private Distribution edgesNumberDistribution;
     private Distribution edgesLocalityDistribution;
-    private double selfLoopValue;
+    private Double selfLoopValue;
     private Long seed;
-    private int run;
+//    private int dtmcNumber;
+    private double confidence;
+    private double error;
     private boolean connectSCCs;
     private String description;
 
@@ -36,11 +38,11 @@ public class Config {
         this.edgesLocalityDistribution = edgesLocalityDistribution;
     }
 
-    public double getSelfLoopValue() {
+    public Double getSelfLoopValue() {
         return selfLoopValue;
     }
 
-    public void setSelfLoopValue(double selfLoopValue) {
+    public void setSelfLoopValue(Double selfLoopValue) {
         this.selfLoopValue = selfLoopValue;
     }
 
@@ -52,13 +54,13 @@ public class Config {
         this.seed = seed;
     }
 
-    public int getRun() {
-        return run;
-    }
-
-    public void setRun(int run) {
-        this.run = run;
-    }
+//    public int getDtmcNumber() {
+//        return dtmcNumber;
+//    }
+//
+//    public void setDtmcNumber(int dtmcNumber) {
+//        this.dtmcNumber = dtmcNumber;
+//    }
 
     public boolean isConnectSCCs() {
         return connectSCCs;
@@ -73,5 +75,21 @@ public class Config {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public double getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(double confidence) {
+        this.confidence = confidence;
+    }
+
+    public double getError() {
+        return error;
+    }
+
+    public void setError(double error) {
+        this.error = error;
     }
 }

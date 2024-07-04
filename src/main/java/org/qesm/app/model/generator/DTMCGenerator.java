@@ -13,11 +13,11 @@ public class DTMCGenerator {
     // una volta campionato in numero di archi uscenti uso edgesLocalityDistribution (che potrebbe essere
     // per esempio una gaussiana o una uniforme [-4, +4]) per assegnare per ogni arco verso che nodo va
     private Distribution edgesLocalityDistribution;
-    private double selfLoopValue;
+    private Double selfLoopValue;
     boolean connectSCC;
 
     public DTMCGenerator(int n, Distribution edgesNumberDistribution, Distribution edgesLocalityDistribution,
-                         double selfLoopProbability, boolean connectSCC) {
+                         Double selfLoopProbability, boolean connectSCC) {
         N = n;
         this.edgesNumberDistribution = edgesNumberDistribution;
         this.edgesLocalityDistribution = edgesLocalityDistribution;
@@ -91,7 +91,8 @@ public class DTMCGenerator {
         if (!checkDistributionsCompatibility()) {
             throw new RuntimeException("Input distributions should be compatible");
         }
-        if (!checkSelfLoopCompatibility()) {
+        boolean selfLoopProbabilitySetByUser = selfLoopValue != null;
+        if (selfLoopProbabilitySetByUser && !checkSelfLoopCompatibility()) {
             throw new RuntimeException("Self loop value should be less than 1");
         }
         Matrix P = Matrix.zero(N, N);
@@ -105,7 +106,7 @@ public class DTMCGenerator {
                     destNode = (r + edgesLocalityDistribution.getSample() + N) % N;
 //                    Log.logger.info("edgesLocalityDistribution.getSample() = " + destNode);
                 } while (sampledEdgesValues.containsKey(destNode));
-                if (destNode == r) {
+                if (destNode == r && selfLoopProbabilitySetByUser) {
                     sampledEdgesValues.put(destNode, selfLoopValue);
                 }
                 else {
@@ -113,16 +114,24 @@ public class DTMCGenerator {
 //                    Log.logger.info("edgesLocalityDistribution.getSample() = " + sampledEdgesValues.get(destNode));
                 }
             }
-            double selfLoopValueIfPresent = sampledEdgesValues.getOrDefault(r, 0.);
-            sampledEdgesValues.remove(r);
-            double valuesSum = sampledEdgesValues.values().stream().reduce(0., Double::sum);
-            for (Map.Entry<Integer, Double> entry : sampledEdgesValues.entrySet()) {
-                P.set(r, entry.getKey(), entry.getValue() / valuesSum * (1 - selfLoopValueIfPresent));
+            if (selfLoopProbabilitySetByUser) {
+                double selfLoopValueIfPresent = sampledEdgesValues.getOrDefault(r, 0.);
+                sampledEdgesValues.remove(r);
+                double valuesSum = sampledEdgesValues.values().stream().reduce(0., Double::sum);
+                for (Map.Entry<Integer, Double> entry : sampledEdgesValues.entrySet()) {
+                    P.set(r, entry.getKey(), entry.getValue() / valuesSum * (1 - selfLoopValueIfPresent));
+                }
+                if (P.getRow(r).sum() > 0)
+                    P.set(r, r, selfLoopValueIfPresent);
+                else
+                    P.set(r, r, 1);
             }
-            if (P.getRow(r).sum() > 0)
-                P.set(r, r, selfLoopValueIfPresent);
-            else
-                P.set(r, r, 1);
+            else {
+                double valuesSum = sampledEdgesValues.values().stream().reduce(0., Double::sum);
+                for (Map.Entry<Integer, Double> entry : sampledEdgesValues.entrySet()) {
+                    P.set(r, entry.getKey(), entry.getValue() / valuesSum);
+                }
+            }
         }
         return P;
     }

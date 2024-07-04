@@ -1,8 +1,10 @@
 package org.qesm.app.model.sampling.runner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
 import org.qesm.app.model.sampling.sampler.RunResult;
+import org.qesm.app.model.test.StatisticalTest;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -12,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PerfectSampleRunner implements SamplerRunner {
@@ -32,6 +35,21 @@ public class PerfectSampleRunner implements SamplerRunner {
             sampler.reset();
             results.add(sampler.runUntilCoalescence());
         }
+    }
+
+    public int run(StatisticalTest stopConditionTest) {
+        avgSteps = null;
+        stdDevSteps = null;
+        for (int i = 0; i < 100; i++) { // at least 10 samples
+            sampler.reset();
+            results.add(sampler.runUntilCoalescence());
+        }
+        do {
+            sampler.reset();
+            results.add(sampler.runUntilCoalescence());
+            stopConditionTest.updateStats(results.size(), getAvgSteps(), getStdDevSteps());
+        } while (!stopConditionTest.test());
+        return results.size();
     }
 
     @Override

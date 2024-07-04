@@ -15,6 +15,7 @@ import org.qesm.app.model.sampling.runner.DumbSampleRunner;
 import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
 import org.qesm.app.model.sampling.sampler.DumbSampler;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
+import org.qesm.app.model.test.StudentTTest;
 import org.qesm.app.model.utils.Metrics;
 import org.qesm.app.model.utils.RandomUtils;
 import org.la4j.Matrix;
@@ -66,7 +67,7 @@ public class Main {
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd = null;
+        CommandLine cmd;
 
         try {
             cmd = parser.parse(options, args);
@@ -94,7 +95,7 @@ public class Main {
                                         boolean genPostProcessOutput) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
             int N = 16;
-            int runs = 1600;
+//            int dtmcNumber = 10;
             boolean connectSCCs = false;
             Distribution edgesNumberDistribution = new SingleValueDistribution( 4);
             Distribution edgesLocalityDistribution = ManualDistribution.ManualDistributionBuilder.newBuilder()
@@ -103,17 +104,21 @@ public class Main {
                     .distribution(new UniformDistribution(1, 2), 1)
                     .build();
 //            Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
-            double selfLoopValue = 0.4;
+            Double selfLoopValue = null;
             String description = "";
+            double testConfidence = 0.95;
+            double testMaxError = 0.001;
 
             Config config = new Config();
             config.setN(N);
-            config.setRun(runs);
+//            config.setDtmcNumber(dtmcNumber);
             config.setConnectSCCs(connectSCCs);
             config.setEdgesNumberDistribution(edgesNumberDistribution);
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.setSelfLoopValue(selfLoopValue);
             config.setDescription(description);
+            config.setConfidence(testConfidence);
+            config.setError(testMaxError);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -129,7 +134,7 @@ public class Main {
         Distribution edgesNumberDistribution = configuration.getEdgesNumberDistribution();
         Distribution edgesLocalityDistribution = configuration.getEdgesLocalityDistribution();
 
-        double selfLoopValue = configuration.getSelfLoopValue();
+        Double selfLoopValue = configuration.getSelfLoopValue();
         long seed;
         if (configuration.getSeed() != null) {
             seed = configuration.getSeed();
@@ -141,6 +146,7 @@ public class Main {
 
         System.out.println("Seed: " + seed);
         RandomUtils.rand.setSeed(seed);
+
         System.out.println("Generating matrix...");
         DTMCGenerator dtmcGenerator = new DTMCGenerator(N, edgesNumberDistribution,
                 edgesLocalityDistribution, selfLoopValue, configuration.isConnectSCCs());
@@ -156,15 +162,18 @@ public class Main {
 
         // Perfect Sampling
 
-        final int runs = configuration.getRun();
-        System.out.println("Runs: " + runs);
+//        final int runs = 3;
+//        System.out.println("Runs: " + runs);
+        System.out.println("Running...");
         PerfectSampler samplerCFTP = new PerfectSampler(P);
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
-        perfectSampleRunner.run(runs);
+        StudentTTest studentTTest = new StudentTTest(configuration.getConfidence(), configuration.getError());
+        perfectSampleRunner.run(studentTTest);
+        System.out.println("Runs: " + studentTTest.getSamplesSize() + "\t" + studentTTest.toString());
         Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
-//        System.out.println("\nPerfect sampling: ");
-//        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
-//        perfectSampleRunner.getStepsDistribution(true);
+        System.out.println("\nPerfect sampling: ");
+        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+        perfectSampleRunner.getStepsDistribution(false);
         if (genPostProcessOutput) {
             try {
                 perfectSampleRunner.writeOutputs();
@@ -181,11 +190,11 @@ public class Main {
         //Dumb Sampling
 
         DumbSampler dumbSampler = new DumbSampler(P);
-        for (int sigma = 0; sigma <= 3; sigma++) {
+        for (int sigma = 0; sigma <= 2; sigma++) {
             int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);
             DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
                     .steps(nSteps);
-            dumbSampleRunner.run(runs);
+            dumbSampleRunner.run(studentTTest.getSamplesSize());
             Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
             System.out.println("\nDumb sampling (" + sigma + " sigma): ");
             System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));

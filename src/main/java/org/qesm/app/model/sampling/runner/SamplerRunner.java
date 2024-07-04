@@ -1,5 +1,7 @@
 package org.qesm.app.model.sampling.runner;
 
+import org.qesm.app.model.sampling.sampler.RunResult;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
