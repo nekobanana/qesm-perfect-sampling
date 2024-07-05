@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Output {
+    private String fileName;
     private Config config;
     private PerfectSamplingOutput perfectSamplingOutput;
     private List<DumbSamplingOutput> dumbSamplingOutputs = new ArrayList<>();
@@ -60,6 +61,14 @@ public class Output {
         public Double getDistance() {
             return distance;
         }
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public static class DumbSamplingOutput {

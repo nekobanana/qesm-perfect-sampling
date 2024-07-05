@@ -96,10 +96,14 @@ public class PerfectSampleRunner implements SamplerRunner {
         return stdDevSteps;
     }
 
-    public void writeOutputs() throws IOException {
-        Files.createDirectories(Paths.get("postprocess"));
-        sampler.writeSequenceToFile("postprocess/output_seq.json");
-        BufferedWriter writer = new BufferedWriter(new FileWriter("postprocess/results.json"));
+    public void writeSequenceOutput(String fileName) throws IOException {
+        Files.createDirectories(Paths.get("postprocess/results/" + fileName));
+        sampler.writeSequenceToFile("postprocess/results/" + fileName + "/last_seq.json");
+    }
+
+    public void writeResultsOutput(String fileName) throws IOException {
+        Files.createDirectories(Paths.get("postprocess/results/" + fileName));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("postprocess/results/" + fileName + "/results.json"));
         writer.write((new ObjectMapper()).writeValueAsString(results));
         writer.close();
     }

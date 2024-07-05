@@ -25,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -59,11 +60,11 @@ public class Main {
         Option config = new Option("c", "config", true, "generated configuration file");
         config.setRequired(false);
         options.addOption(config);
-
-        Option postProcess = new Option("post", "post", false, "generate output for post process");
-        postProcess.setRequired(false);
-        postProcess.setType(Boolean.class);
-        options.addOption(postProcess);
+//
+//        Option postProcess = new Option("post", "post", false, "generate output for post process");
+//        postProcess.setRequired(false);
+//        postProcess.setType(Boolean.class);
+//        options.addOption(postProcess);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -79,9 +80,8 @@ public class Main {
             String inputFilePath = cmd.getOptionValue("input");
             String outputFilePath = cmd.getOptionValue("output");
             String configFilePath = cmd.getOptionValue("config");
-            Boolean genPostProcessOutput = cmd.getParsedOptionValue("post");
-            if (genPostProcessOutput == null) genPostProcessOutput = false;
-            configExperiment(inputFilePath, outputFilePath, configFilePath, genPostProcessOutput);
+//            Boolean genPostProcessOutput = cmd.getParsedOptionValue("post");
+            configExperiment(inputFilePath, outputFilePath, configFilePath);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("perfect-sampling", options);
@@ -91,8 +91,7 @@ public class Main {
         }
     }
 
-    public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile,
-                                        boolean genPostProcessOutput) throws IOException {
+    public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
             int N = 16;
 //            int dtmcNumber = 10;
@@ -123,18 +122,13 @@ public class Main {
         }
         else { // load config file and start experiment
             Config config = new ObjectMapper().readValue(new File(inputFilePath), Config.class);
-            Output output = runExperiment(config, genPostProcessOutput);
+            Output output = runExperiment(config, new File(outputFilePath).getName());
             writeFile(output, outputFilePath);
         }
     }
 
-    public static Output runExperiment(Config configuration, boolean genPostProcessOutput) {
+    public static Output runExperiment(Config configuration, String outputFileName) {
 
-        int N = configuration.getN();
-        Distribution edgesNumberDistribution = configuration.getEdgesNumberDistribution();
-        Distribution edgesLocalityDistribution = configuration.getEdgesLocalityDistribution();
-
-        Double selfLoopValue = configuration.getSelfLoopValue();
         long seed;
         if (configuration.getSeed() != null) {
             seed = configuration.getSeed();
@@ -144,12 +138,16 @@ public class Main {
             configuration.setSeed(seed);
         }
 
+        int N = configuration.getN();
+
         System.out.println("Seed: " + seed);
         RandomUtils.rand.setSeed(seed);
 
         System.out.println("Generating matrix...");
-        DTMCGenerator dtmcGenerator = new DTMCGenerator(N, edgesNumberDistribution,
-                edgesLocalityDistribution, selfLoopValue, configuration.isConnectSCCs());
+        DTMCGenerator dtmcGenerator = new DTMCGenerator();
+        dtmcGenerator.setEdgesNumberDistribution(configuration.getEdgesNumberDistribution());
+        dtmcGenerator.setEdgesLocalityDistribution(configuration.getEdgesLocalityDistribution());
+        dtmcGenerator.setN(N);
         Matrix P = dtmcGenerator.getMatrix();
 
         // Steady state distribution
@@ -159,11 +157,9 @@ public class Main {
 
         Output output = new Output();
         output.setConfig(configuration);
-
+        output.setFileName(outputFileName);
         // Perfect Sampling
 
-//        final int runs = 3;
-//        System.out.println("Runs: " + runs);
         System.out.println("Running...");
         PerfectSampler samplerCFTP = new PerfectSampler(P);
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
@@ -174,12 +170,15 @@ public class Main {
         System.out.println("\nPerfect sampling: ");
         System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
         perfectSampleRunner.getStepsDistribution(false);
-        if (genPostProcessOutput) {
-            try {
-                perfectSampleRunner.writeOutputs();
-            } catch (IOException e) {
-                System.out.println("Cannot write Perfect sampling output file");
+        try {
+            if (configuration.isPythonHistogramImage()) {
+                perfectSampleRunner.writeResultsOutput(outputFileName);
             }
+            if (configuration.isPythonLastSequenceImage()) {
+                perfectSampleRunner.writeSequenceOutput(outputFileName);
+            }
+        } catch (IOException e) {
+            System.out.println("Cannot write Perfect sampling output file");
         }
         Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
         psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());

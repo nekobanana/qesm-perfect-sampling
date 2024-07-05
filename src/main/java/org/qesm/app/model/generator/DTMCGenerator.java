@@ -16,16 +16,11 @@ public class DTMCGenerator {
     private Double selfLoopValue;
     boolean connectSCC;
 
-    public DTMCGenerator(int n, Distribution edgesNumberDistribution, Distribution edgesLocalityDistribution,
-                         Double selfLoopProbability, boolean connectSCC) {
-        N = n;
-        this.edgesNumberDistribution = edgesNumberDistribution;
-        this.edgesLocalityDistribution = edgesLocalityDistribution;
-        this.selfLoopValue = selfLoopProbability;
-        this.connectSCC = connectSCC;
-    }
 
     public Matrix getMatrix() {
+        if (!checkNotNullInputs()) {
+            throw new RuntimeException("Please set a value for N, edgesNumberDistribution, and edgesLocalityDistribution");
+        }
         Matrix P;
         if (connectSCC) {
             P = generateDTMCMatrix();
@@ -134,6 +129,32 @@ public class DTMCGenerator {
             }
         }
         return P;
+    }
+
+    private boolean checkNotNullInputs() {
+        return N > 0 &&
+                this.edgesNumberDistribution != null && this.edgesLocalityDistribution != null;
+    }
+
+
+    public void setConnectSCC(boolean connectSCC) {
+        this.connectSCC = connectSCC;
+    }
+
+    public void setSelfLoopValue(Double selfLoopValue) {
+        this.selfLoopValue = selfLoopValue;
+    }
+
+    public void setEdgesLocalityDistribution(Distribution edgesLocalityDistribution) {
+        this.edgesLocalityDistribution = edgesLocalityDistribution;
+    }
+
+    public void setEdgesNumberDistribution(Distribution edgesNumberDistribution) {
+        this.edgesNumberDistribution = edgesNumberDistribution;
+    }
+
+    public void setN(int n) {
+        N = n;
     }
 
     private boolean checkDistributionsCompatibility() {

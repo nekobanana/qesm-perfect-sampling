@@ -14,12 +14,38 @@ public class Config {
     private boolean connectSCCs;
     private String description;
 
+    private boolean pythonHistogramImage;
+    private boolean pythonLastSequenceImage;
+
     public int getN() {
         return N;
     }
 
     public void setN(int n) {
         N = n;
+    }
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public boolean isPythonHistogramImage() {
+        return pythonHistogramImage;
+    }
+
+    public void setPythonHistogramImage(boolean pythonHistogramImage) {
+        this.pythonHistogramImage = pythonHistogramImage;
+    }
+
+    public boolean isPythonLastSequenceImage() {
+        return pythonLastSequenceImage;
+    }
+
+    public void setPythonLastSequenceImage(boolean pythonLastSequenceImage) {
+        this.pythonLastSequenceImage = pythonLastSequenceImage;
     }
 
     public Distribution getEdgesNumberDistribution() {

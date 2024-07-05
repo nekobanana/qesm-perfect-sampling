@@ -37,7 +37,7 @@ public class StudentTTest implements StatisticalTest {
     }
 
     @Override
-    public String toString() {
+    public String EF:E4:CC:EF:97:59toString() {
         return "StudentTTest{" +
                 "samplesSize=" + samplesSize +
                 ", samplesAvg=" + samplesAvg +
