@@ -18,10 +18,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PerfectSampleRunner implements SamplerRunner {
-    PerfectSampler sampler;
-    List<RunResult> results = new ArrayList<>();
-    Float avgSteps;
-    Double stdDevSteps;
+    private PerfectSampler sampler;
+    private List<RunResult> results = new ArrayList<>();
+    private Float avgSteps;
+    private Double stdDevSteps;
+
+    private static final String postprocDirPath = "postprocess/";
+    private static final String outputDirPath = postprocDirPath + "results/";
+    private List<Process> outputWriteProcesses = new ArrayList<>();
 
     public PerfectSampleRunner(PerfectSampler sampler) {
         this.sampler = sampler;
@@ -96,15 +100,33 @@ public class PerfectSampleRunner implements SamplerRunner {
         return stdDevSteps;
     }
 
-    public void writeSequenceOutput(String fileName) throws IOException {
-        Files.createDirectories(Paths.get("postprocess/results/" + fileName));
-        sampler.writeSequenceToFile("postprocess/results/" + fileName + "/last_seq.json");
+    public void writeSequenceOutput(String dirName) throws IOException {
+        Files.createDirectories(Paths.get(outputDirPath + dirName));
+        String outputFileName = outputDirPath + dirName + "/last_seq.json";
+        sampler.writeSequenceToFile(outputFileName);
+        outputWriteProcesses.add(Runtime.getRuntime().exec(
+                postprocDirPath + "venv/bin/python " + postprocDirPath + "main.py -s " + outputFileName));
     }
 
-    public void writeResultsOutput(String fileName) throws IOException {
-        Files.createDirectories(Paths.get("postprocess/results/" + fileName));
-        BufferedWriter writer = new BufferedWriter(new FileWriter("postprocess/results/" + fileName + "/results.json"));
+    public void writeResultsOutput(String dirName) throws IOException {
+        Files.createDirectories(Paths.get(outputDirPath + dirName));
+        String outputFileName = outputDirPath + dirName + "/results.json";
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
         writer.write((new ObjectMapper()).writeValueAsString(results));
         writer.close();
+        outputWriteProcesses.add(Runtime.getRuntime().exec(
+                postprocDirPath + "venv/bin/python " + postprocDirPath + "main.py -h " + outputFileName));
+    }
+
+    public void waitForOutputWrite() {
+        for (Process process : outputWriteProcesses) {
+            try {
+                process.waitFor();
+            }
+            catch (InterruptedException e) {
+                // Handle exception that could occur when waiting
+                // for a spawned process to terminate
+            }
+        }
     }
 }

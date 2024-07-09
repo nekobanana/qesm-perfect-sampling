@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FilenameUtils;
 import org.qesm.app.model.Config;
 import org.qesm.app.model.Output;
 import org.qesm.app.model.generator.DTMCGenerator;
@@ -97,16 +98,13 @@ public class Main {
 //            int dtmcNumber = 10;
             boolean connectSCCs = false;
             Distribution edgesNumberDistribution = new SingleValueDistribution( 4);
-            Distribution edgesLocalityDistribution = ManualDistribution.ManualDistributionBuilder.newBuilder()
-                    .distribution(new UniformDistribution(-2, -1), 1)
-                    .distribution(new SingleValueDistribution(0), 2)
-                    .distribution(new UniformDistribution(1, 2), 1)
-                    .build();
-//            Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
+            Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
             Double selfLoopValue = null;
             String description = "";
             double testConfidence = 0.95;
             double testMaxError = 0.001;
+            boolean outputHistogram = true;
+            boolean outputSeqDiagram = false;
 
             Config config = new Config();
             config.setN(N);
@@ -118,6 +116,8 @@ public class Main {
             config.setDescription(description);
             config.setConfidence(testConfidence);
             config.setError(testMaxError);
+            config.setPythonHistogramImage(outputHistogram);
+            config.setPythonLastSequenceImage(outputSeqDiagram);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -171,12 +171,14 @@ public class Main {
         System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
         perfectSampleRunner.getStepsDistribution(false);
         try {
+            String dirName = FilenameUtils.removeExtension(outputFileName);
             if (configuration.isPythonHistogramImage()) {
-                perfectSampleRunner.writeResultsOutput(outputFileName);
+                perfectSampleRunner.writeResultsOutput(dirName);
             }
             if (configuration.isPythonLastSequenceImage()) {
-                perfectSampleRunner.writeSequenceOutput(outputFileName);
+                perfectSampleRunner.writeSequenceOutput(dirName);
             }
+//            perfectSampleRunner.waitForOutputWrite();
         } catch (IOException e) {
             System.out.println("Cannot write Perfect sampling output file");
         }

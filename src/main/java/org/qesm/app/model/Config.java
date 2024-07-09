@@ -24,13 +24,6 @@ public class Config {
     public void setN(int n) {
         N = n;
     }
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
 
     public boolean isPythonHistogramImage() {
         return pythonHistogramImage;
