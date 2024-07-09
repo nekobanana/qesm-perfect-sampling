@@ -1,15 +1,17 @@
 import json
+import os
+
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def main():
+def histogram(results_json):
     # Load the data
-    with open("results/output/results.json") as f:
+    with open(results_json) as f:
         data = json.load(f)
-
+    parent_dir = os.path.dirname(os.path.join(results_json))
     # Extract the 'steps' values
     steps = [entry['steps'] for entry in data]
 
@@ -32,7 +34,7 @@ def main():
     # Plotting the histogram of the data and the best fit distribution
     plt.figure(figsize=(10, 6))
     plt.hist(steps, bins=max(steps) - min(steps) + 1, density=True, alpha=0.6, color='g', label='Data')
-    plt.show()
+    plt.savefig(f'{parent_dir}/hist.png')
 
     plt.figure(figsize=(10, 6))
     x = np.linspace(min(steps), max(steps), 1000)
@@ -53,12 +55,19 @@ def main():
     plt.xlabel('Steps')
     plt.ylabel('Density')
     plt.title('Histogram of Steps with Best Fit Distribution')
-    plt.show()
+    plt.savefig(f'{parent_dir}/hist_fit.png')
 
     print(f'Best Fit Distribution: {best_dist_name}')
     for dist in results:
         print(f'{dist[0]}:\t D={dist[1]},\t p={dist[2]}')
 
+    r = {
+        'best_fit': best_dist_name,
+        'results': results
+    }
+    r_path = os.path.join(parent_dir, 'best_fit.json')
+    with open(r_path, 'w') as fp:
+        json.dump(r, fp)
 
 if __name__ == '__main__':
-    main()
+    histogram('results/output/results.json')
