@@ -16,7 +16,9 @@ import org.qesm.app.model.sampling.runner.DumbSampleRunner;
 import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
 import org.qesm.app.model.sampling.sampler.DumbSampler;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
+import org.qesm.app.model.test.StatisticalTest;
 import org.qesm.app.model.test.StudentTTest;
+import org.qesm.app.model.test.ZTest;
 import org.qesm.app.model.utils.Metrics;
 import org.qesm.app.model.utils.RandomUtils;
 import org.la4j.Matrix;
@@ -101,6 +103,7 @@ public class Main {
             Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
             Double selfLoopValue = null;
             String description = "";
+            Class testClass = ZTest.class;
             double testConfidence = 0.95;
             double testMaxError = 0.001;
             boolean outputHistogram = true;
@@ -114,20 +117,28 @@ public class Main {
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.setSelfLoopValue(selfLoopValue);
             config.setDescription(description);
-            config.setConfidence(testConfidence);
-            config.setError(testMaxError);
+            config.getStatisticalTestConfig().setTestClass(testClass);
+            config.getStatisticalTestConfig().setConfidence(testConfidence);
+            config.getStatisticalTestConfig().setError(testMaxError);
             config.setPythonHistogramImage(outputHistogram);
             config.setPythonLastSequenceImage(outputSeqDiagram);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
             Config config = new ObjectMapper().readValue(new File(inputFilePath), Config.class);
-            Output output = runExperiment(config, new File(outputFilePath).getName());
+            Output output = null;
+            try {
+                output = runExperiment(config, new File(outputFilePath).getName());
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            }
             writeFile(output, outputFilePath);
         }
     }
 
-    public static Output runExperiment(Config configuration, String outputFileName) {
+    public static Output runExperiment(Config configuration, String outputFileName) throws IllegalAccessException, InstantiationException {
 
         long seed;
         if (configuration.getSeed() != null) {
@@ -163,9 +174,11 @@ public class Main {
         System.out.println("Running...");
         PerfectSampler samplerCFTP = new PerfectSampler(P);
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
-        StudentTTest studentTTest = new StudentTTest(configuration.getConfidence(), configuration.getError());
-        perfectSampleRunner.run(studentTTest);
-        System.out.println("Runs: " + studentTTest.getSamplesSize() + "\t" + studentTTest.toString());
+        StatisticalTest statTest = (StatisticalTest) configuration.getStatisticalTestConfig().getTestClass().newInstance();
+        statTest.setConfidence(configuration.getStatisticalTestConfig().getConfidence());
+        statTest.setMaxError(configuration.getStatisticalTestConfig().getError());
+        perfectSampleRunner.run(statTest);
+        System.out.println("Runs: " + statTest.getSamplesSize() + "\t" + statTest.toString());
         Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
         System.out.println("\nPerfect sampling: ");
         System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
@@ -195,7 +208,7 @@ public class Main {
             int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);
             DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
                     .steps(nSteps);
-            dumbSampleRunner.run(studentTTest.getSamplesSize());
+            dumbSampleRunner.run(statTest.getSamplesSize());
             Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
             System.out.println("\nDumb sampling (" + sigma + " sigma): ");
             System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));

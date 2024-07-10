@@ -9,8 +9,7 @@ public class Config {
     private Double selfLoopValue;
     private Long seed;
 //    private int dtmcNumber;
-    private double confidence;
-    private double error;
+    private StatisticalTestConfig statisticalTestConfig = new StatisticalTestConfig();
     private boolean connectSCCs;
     private String description;
 
@@ -92,23 +91,46 @@ public class Config {
         return description;
     }
 
+    public StatisticalTestConfig getStatisticalTestConfig() {
+        return statisticalTestConfig;
+    }
+
+    public void setStatisticalTestConfig(StatisticalTestConfig statisticalTestConfig) {
+        this.statisticalTestConfig = statisticalTestConfig;
+    }
+
     public void setDescription(String description) {
         this.description = description;
+
     }
 
-    public double getConfidence() {
-        return confidence;
-    }
+    public static class StatisticalTestConfig {
+        private double confidence;
+        private double error;
+        private Class testClass;
 
-    public void setConfidence(double confidence) {
-        this.confidence = confidence;
-    }
+        public double getConfidence() {
+            return confidence;
+        }
 
-    public double getError() {
-        return error;
-    }
+        public void setConfidence(double confidence) {
+            this.confidence = confidence;
+        }
 
-    public void setError(double error) {
-        this.error = error;
+        public double getError() {
+            return error;
+        }
+
+        public void setError(double error) {
+            this.error = error;
+        }
+
+        public Class getTestClass() {
+            return testClass;
+        }
+
+        public void setTestClass(Class testClass) {
+            this.testClass = testClass;
+        }
     }
 }

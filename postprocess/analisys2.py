@@ -31,31 +31,28 @@ def histogram(results_json):
     best_fit = max(results, key=lambda x: x[2])
     best_dist_name, best_D, best_p_value, best_param = best_fit
 
+    for b in [max(steps) - min(steps) + 1, 20]:
+        plt.figure(figsize=(10, 6))
+        plt.hist(steps, bins=b, density=False, alpha=0.6, color='g', label='Data')
+        plt.savefig(f'{parent_dir}/hist_{b}.png')
+
     # Plotting the histogram of the data and the best fit distribution
-    plt.figure(figsize=(10, 6))
-    plt.hist(steps, bins=max(steps) - min(steps) + 1, density=True, alpha=0.6, color='g', label='Data')
-    plt.savefig(f'{parent_dir}/hist.png')
-
-    plt.figure(figsize=(10, 6))
-    x = np.linspace(min(steps), max(steps), 1000)
-    observed_freq, bin_edges = np.histogram(np.array(steps), bins=max(steps) - min(steps) + 1)
-    # x = np.linspace(min(steps), max(steps), b)
-    plt.bar(bin_edges[:-1], observed_freq / len(steps), width=np.diff(bin_edges), align="edge", alpha=0.3, color='grey')
-    colormap = plt.colormaps['Set2'].colors
-    color = iter(colormap)
-    for dist in results:
-        pdf = getattr(stats, dist[0]).pdf(x, *dist[3])
-        plt.plot(x, pdf, '-', c=next(color), label=f'{dist[0]}' + (' (best fit)' if dist[0] == best_dist_name else ''))
-    # Generate data from the best fit distribution
-    # pdf_fitted = getattr(stats, best_dist_name).pdf(x, *best_param)
-
-    # plt.plot(x, pdf_fitted, 'r-', label=f'Best fit: {best_dist_name}')
-    plt.legend()
-    plt.ylim([0, 1.05 * max(observed_freq) / len(steps)])
-    plt.xlabel('Steps')
-    plt.ylabel('Density')
-    plt.title('Histogram of Steps with Best Fit Distribution')
-    plt.savefig(f'{parent_dir}/hist_fit.png')
+    for b in [max(steps) - min(steps) + 1, 20]:
+        plt.figure(figsize=(10, 6))
+        x = np.linspace(min(steps), max(steps), 1000)
+        observed_freq, bin_edges = np.histogram(np.array(steps), bins=b)
+        plt.bar(bin_edges[:-1], observed_freq / len(steps), width=np.diff(bin_edges), align="edge", alpha=0.3, color='grey')
+        colormap = plt.colormaps['Set2'].colors
+        color = iter(colormap)
+        for dist in results:
+            pdf = getattr(stats, dist[0]).pdf(x, *dist[3])
+            plt.plot(x, pdf, '-', c=next(color), label=f'{dist[0]}' + (' (best fit)' if dist[0] == best_dist_name else ''))
+        plt.legend()
+        plt.ylim([0, 1.05 * max(observed_freq) / len(steps)])
+        plt.xlabel('Steps')
+        plt.ylabel('Density')
+        plt.title('Histogram of Steps with Best Fit Distribution')
+        plt.savefig(f'{parent_dir}/hist_fit_{b}.png')
 
     print(f'Best Fit Distribution: {best_dist_name}')
     for dist in results:
