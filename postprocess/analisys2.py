@@ -4,8 +4,6 @@ import os
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
-import seaborn as sns
-
 
 def histogram(results_json):
     # Load the data

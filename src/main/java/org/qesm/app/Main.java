@@ -151,6 +151,7 @@ public class Main {
 
         int N = configuration.getN();
 
+        System.out.println("***** " + outputFileName + " *****");
         System.out.println("Seed: " + seed);
         RandomUtils.rand.setSeed(seed);
 
@@ -219,6 +220,7 @@ public class Main {
             dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
             output.getDumbSamplingOutputs().add(dsOutput);
         }
+        System.out.println("\n\n");
         return output;
     }
 

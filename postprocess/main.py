@@ -1,17 +1,14 @@
-import argparse
 import getopt
 import json
 import os
 import sys
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from analisys2 import histogram
 
 
 def sequence_diagram(sequence_json, cftp=True):
-# def sequence_diagram(sequence_json, results_json, cftp=True):
     plt.figure()
     parent_dir = os.path.dirname(os.path.join(sequence_json))
     data = json.load(open(sequence_json))
