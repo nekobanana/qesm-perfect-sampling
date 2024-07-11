@@ -1,5 +1,7 @@
 package org.qesm.app.model;
 
+import org.qesm.app.model.test.StatisticalTest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,7 @@ public class Output {
         Float avgSteps;
         Double sigma;
         Double distance;
+        StatisticalTest statisticalTest;
 
         public void setAvgSteps(Float avgSteps) {
             this.avgSteps = avgSteps;
@@ -60,6 +63,14 @@ public class Output {
 
         public Double getDistance() {
             return distance;
+        }
+
+        public StatisticalTest getStatisticalTest() {
+            return statisticalTest;
+        }
+
+        public void setStatisticalTest(StatisticalTest statisticalTest) {
+            this.statisticalTest = statisticalTest;
         }
     }
 

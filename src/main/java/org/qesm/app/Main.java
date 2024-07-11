@@ -182,7 +182,7 @@ public class Main {
         Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
         System.out.println("\nPerfect sampling: ");
         System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
-        perfectSampleRunner.getStepsDistribution(false);
+
         try {
             String dirName = FilenameUtils.removeExtension(outputFileName);
             if (configuration.isPythonHistogramImage()) {
@@ -196,6 +196,7 @@ public class Main {
             System.out.println("Cannot write Perfect sampling output file");
         }
         Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
+        psOutput.setStatisticalTest(statTest);
         psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());
         psOutput.setSigma(perfectSampleRunner.getStdDevSteps());
         psOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piCFTP, N));

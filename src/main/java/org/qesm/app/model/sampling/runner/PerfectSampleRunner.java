@@ -22,6 +22,7 @@ public class PerfectSampleRunner implements SamplerRunner {
     private List<RunResult> results = new ArrayList<>();
     private Float avgSteps;
     private Double stdDevSteps;
+    private int minSamplesNumber = 2;
 
     private static final String postprocDirPath = "postprocess/";
     private static final String outputDirPath = postprocDirPath + "results/";
@@ -44,14 +45,17 @@ public class PerfectSampleRunner implements SamplerRunner {
     public int run(StatisticalTest stopConditionTest) {
         avgSteps = null;
         stdDevSteps = null;
-        for (int i = 0; i < 100; i++) { // at least 10 samples
+        for (int i = 0; i < minSamplesNumber; i++) {
             sampler.reset();
-            results.add(sampler.runUntilCoalescence());
+            RunResult result = sampler.runUntilCoalescence();
+            results.add(result);
+            stopConditionTest.addNewSample(result.getSteps());
         }
         do {
             sampler.reset();
-            results.add(sampler.runUntilCoalescence());
-            stopConditionTest.updateStats(results.size(), getAvgSteps(), getStdDevSteps());
+            RunResult result = sampler.runUntilCoalescence();
+            results.add(result);
+            stopConditionTest.addNewSample(result.getSteps());
         } while (!stopConditionTest.test());
         return results.size();
     }
@@ -86,17 +90,13 @@ public class PerfectSampleRunner implements SamplerRunner {
     }
 
     public Float getAvgSteps() {
-        if (avgSteps == null) {
             avgSteps = (float) results.stream().mapToInt(RunResult::getSteps).sum() / results.size();
-        }
         return avgSteps;
     }
 
     public Double getStdDevSteps() {
-        if (stdDevSteps == null) {
             stdDevSteps = Math.sqrt(results.stream()
-                    .mapToDouble((r) -> Math.pow(r.getSteps() - avgSteps, 2)).sum()) / avgSteps;
-        }
+                    .mapToDouble((r) -> Math.pow(r.getSteps() - avgSteps, 2)).sum()) / (avgSteps - 1);
         return stdDevSteps;
     }
 
@@ -128,5 +128,9 @@ public class PerfectSampleRunner implements SamplerRunner {
                 // for a spawned process to terminate
             }
         }
+    }
+
+    public int getNRuns() {
+        return results.size();
     }
 }

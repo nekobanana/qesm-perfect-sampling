@@ -10,7 +10,7 @@ public class StudentTTest extends StatisticalTest {
 
     @Override
     protected double getCriticalValue() {
-        TDistribution tDistribution = new TDistribution(samplesSize - 1);
+        TDistribution tDistribution = new TDistribution(currentSamplesSize - 1);
         return tDistribution.inverseCumulativeProbability(1 - (1 - confidence) / 2);
     }
 }
