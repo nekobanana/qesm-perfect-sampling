@@ -204,7 +204,6 @@ public class Main {
         output.setPerfectSamplingOutput(psOutput);
 
         //Dumb Sampling
-
         DumbSampler dumbSampler = new DumbSampler(P);
         for (int sigma = 0; sigma <= 2; sigma++) {
             int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);

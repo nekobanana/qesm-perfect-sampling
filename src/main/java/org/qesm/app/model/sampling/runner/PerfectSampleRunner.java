@@ -96,7 +96,7 @@ public class PerfectSampleRunner implements SamplerRunner {
 
     public Double getStdDevSteps() {
             stdDevSteps = Math.sqrt(results.stream()
-                    .mapToDouble((r) -> Math.pow(r.getSteps() - avgSteps, 2)).sum()) / (avgSteps - 1);
+                    .mapToDouble(r -> Math.pow(r.getSteps() - avgSteps, 2)).sum() / (results.size() - 1));
         return stdDevSteps;
     }
 
