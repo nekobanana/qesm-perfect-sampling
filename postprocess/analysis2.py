@@ -15,7 +15,7 @@ def histogram(results_json):
     steps = [entry['steps'] for entry in data]
 
     # Fit various distributions and perform goodness-of-fit tests
-    distributions = ['norm', 'expon', 'gamma', 'lognorm', 'beta', 'weibull_min']
+    distributions = ['norm', 'expon', 'gamma', 'lognorm', 'beta', 'weibull_min', 'erlang']
     results = []
 
     for dist_name in distributions:
@@ -41,7 +41,8 @@ def histogram(results_json):
         plt.savefig(f'{parent_dir}/hist_{b}.png')
 
     # Plotting the histogram of the data and the best fit distribution
-    for b in [max(steps) - min(steps) + 1, 20]:
+    for b in [max(steps) - min(steps) + 1]:
+    # for b in [max(steps) - min(steps) + 1, 20]:
         plt.figure(figsize=(10, 6))
         x = np.linspace(min(steps), max(steps), 1000)
         observed_freq, bin_edges = np.histogram(np.array(steps), bins=b)
@@ -68,8 +69,7 @@ def histogram(results_json):
     }
     r_path = os.path.join(parent_dir, 'best_fit.json')
     with open(r_path, 'w') as fp:
-        json.dump(r, fp)
-    # r_path_csv = os.path.join(parent_dir, 'best_fit.csv')
+        json.dump(r, fp, indent=4)
 
 
 def gaussian(results_json):

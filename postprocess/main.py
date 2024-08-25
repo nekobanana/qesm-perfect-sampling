@@ -5,15 +5,15 @@ import sys
 
 import matplotlib.pyplot as plt
 
-from analisys2 import histogram
+from analysis2 import histogram
 
 
-def sequence_diagram(sequence_json, cftp=True):
-    plt.figure()
+def sequence_diagram(sequence_json):
+    plt.figure(figsize=(len(sequence_json)*2, 6), dpi=200)
     parent_dir = os.path.dirname(os.path.join(sequence_json))
     data = json.load(open(sequence_json))
     n = data['P']['rows']
-    for s in data['sequence']:
+    for t, s in data['sequence'].items():
         time = s['time']
         plt.plot([time, time], [0, n-1], '--', c='gray', linewidth=0.5)
         for stateId, state in s['states'].items():
@@ -21,61 +21,48 @@ def sequence_diagram(sequence_json, cftp=True):
             if state['nextStateId'] is not None:
                 plt.plot([time, time + 1], [stateId, state['nextStateId']], c='black', linewidth=0.7)
 
-    if cftp:
-        colormap = plt.colormaps['Set2'].colors
-        color = iter(colormap)
-        for stateId in range(n):
-            c = next(color)
-            prev_stateId = stateId
-            for s in reversed(data['sequence']):
-                state = s['states'][f'{prev_stateId}']
-                time = s['time']
-                if state['nextStateId'] is not None:
-                    plt.plot([time, time + 1], [prev_stateId, state['nextStateId']], c=c)
-                    prev_stateId = state['nextStateId']
-    plt.savefig(f'{parent_dir}/sequence_{"cftp" if cftp else "forward"}.png')
+    color = ColormapIterator(plt.colormaps['Set2'].colors)
+    for stateId in range(n):
+        c = next(color)
+        prev_state_id = stateId
+        for t, s in reversed(data['sequence'].items()):
+            state = s['states'][f'{prev_state_id}']
+            time = s['time']
+            if state['nextStateId'] is not None:
+                plt.plot([time, time + 1], [prev_state_id, state['nextStateId']], c=c)
+                prev_state_id = state['nextStateId']
+    plt.savefig(f'{parent_dir}/sequence_cftp.png')
 
-
-# def results_histogram(results_json, cftp=True, num_labels=10):
-#     plt.figure()
-#     parent_dir = os.path.dirname(os.path.join(results_json))
-#     with open(results_json) as f:
-#         results = json.load(f)
-#     steps = [r['steps'] for r in results]
-#     counts, bins = np.histogram(steps, bins=np.arange(0, max(steps) + 1))
-#     max_steps = max(steps)
-#     step_interval = max_steps // num_labels if max_steps > num_labels else 1
-#     plt.xticks(np.arange(0, max_steps + 1, step_interval))
-#     plt.hist(bins[:-1], bins, weights=counts)
-#     plt.xlabel('Steps number')
-#     plt.ylabel('Frequency')
-#     plt.title('Steps number')
-#
-#     # Salvare l'immagine
-#     plt.savefig(f'{parent_dir}/hist_{"cftp" if cftp else "forward"}.png')
-#     plt.close()
-# def results_histogram(results_json, cftp=True):
-#     plt.figure()
-#     parent_dir = os.path.dirname(os.path.join(results_json))
-#     results = json.load(open(results_json))
-#     steps = [r['steps'] for r in results]
-#     counts, bins = np.histogram(steps, bins=np.arange(0, max(steps)))
-#     plt.xticks(np.arange(0, max(steps), 2))
-#     plt.hist(bins[:-1], bins, weights=counts)
-#     plt.savefig(f'{parent_dir}/hist_{"cftp" if cftp else "forward"}.png')
-
-def main(argumentList):
+def main(argument_list):
     options = "h:s:"
     long_options = ["histogram", "sequence"]
     try:
-        arguments, values = getopt.getopt(argumentList, options, long_options)
-        for currentArgument, currentValue in arguments:
-            if currentArgument in ("-h", "--histogram"):
-                histogram(currentValue)
-            elif currentArgument in ("-s", "--sequence"):
-                sequence_diagram(currentValue)
+        arguments, values = getopt.getopt(argument_list, options, long_options)
+        for current_argument, current_value in arguments:
+            if current_argument in ("-h", "--histogram"):
+                print('Generating histogram...')
+                histogram(current_value)
+            elif current_argument in ("-s", "--sequence"):
+                print('Generating sequence image...')
+                sequence_diagram(current_value)
     except getopt.error as err:
         print(str(err))
+
+
+class ColormapIterator:
+    def __init__(self, cmap):
+        self._cmap = cmap
+        self.cmap = iter(cmap[:])
+
+    def __iter__(self):
+        while True:
+            try:
+                yield next(self.cmap)
+            except StopIteration:
+                self.cmap = iter(self._cmap[:])
+
+    def __next__(self):
+        return next(self.__iter__())
 
 
 if __name__ == '__main__':
