@@ -29,14 +29,13 @@ public abstract class Sampler {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
-    protected int generateNextStateNumber(int i) {
+    protected int generateNextStateNumberFromRandomValue(int i, double random) {
         double leftThreshold;
         double rightThreshold = 0;
-        double r = rand.nextDouble();
         for (int j = 0; j < n; j++) {
             leftThreshold = rightThreshold;
             rightThreshold = P.get(i, j) + leftThreshold;
-            if (r < rightThreshold) {
+            if (random < rightThreshold) {
                 return j;
             }
         }

@@ -35,9 +35,10 @@ public class ForwardSampler extends Sampler {
 
     private StatesSnapshot generateNewSnapshot() {
         StatesSnapshot newStatesSnapshot = new StatesSnapshot();
+        double random = rand.nextDouble();
         for (Map.Entry<Integer, State> entry : sequence.get(sequence.size() - 1).getStates().entrySet()) {
             State s;
-            int currentStateId = generateNextStateNumber(entry.getKey());
+            int currentStateId = generateNextStateNumberFromRandomValue(entry.getKey(), random);
             if (!newStatesSnapshot.getStates().containsKey(currentStateId)) {
                 s = new State();
                 s.setId(currentStateId);

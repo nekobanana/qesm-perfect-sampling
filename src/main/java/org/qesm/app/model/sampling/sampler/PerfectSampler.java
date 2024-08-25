@@ -13,23 +13,15 @@ public class PerfectSampler extends Sampler {
     private Map<Integer, StatesSnapshot> sequence = new HashMap<>();
     private int currentTime = 0;
     private final boolean keepSequence;
-    private Integer keepSequenceLength;
-
-    private PerfectSampler(Matrix P, boolean keepSequence, Integer keepSequenceLength) {
-        super(P);
-        this.keepSequence = keepSequence;
-        this.keepSequenceLength = keepSequenceLength;
-    }
+    private int keepSequenceLength = 2;
 
     public PerfectSampler(Matrix P, boolean keepSequence) {
-        this(P, keepSequence, keepSequence? null: 2);
-    }
-    public PerfectSampler(Matrix P) {
-        this(P, false, 2);
+        super(P);
+        this.keepSequence = keepSequence;
     }
 
-    public PerfectSampler(Matrix P, int keepSequenceLength) {
-        this(P, false, keepSequenceLength);
+    public PerfectSampler(Matrix P) {
+        this(P, false);
     }
 
     @Override
@@ -55,12 +47,13 @@ public class PerfectSampler extends Sampler {
 
     private StatesSnapshot generateNewSnapshot() {
         StatesSnapshot newStatesSnapshot = new StatesSnapshot();
+        double random = rand.nextDouble();
         for (int i = 0; i < n; i++) {
             // se invece di coupling from the past vado in avanti
             // via via che gli stati coalescono non devo più iterare su tutti
             State s = new State();
             s.setId(i);
-            State nextState = getState(generateNextStateNumber(i), currentTime + 1);
+            State nextState = getState(generateNextStateNumberFromRandomValue(i, random), currentTime + 1);
             s.setNext(nextState);
             s.setFlag(nextState.getFlag());
             newStatesSnapshot.addState(i, s);

@@ -112,7 +112,7 @@ public class PerfectSampleRunner implements SamplerRunner {
         Files.createDirectories(Paths.get(outputDirPath + dirName));
         String outputFileName = outputDirPath + dirName + "/results.json";
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
-        writer.write((new ObjectMapper()).writeValueAsString(results));
+        writer.write((new ObjectMapper()).writerWithDefaultPrettyPrinter().writeValueAsString(results));
         writer.close();
         outputWriteProcesses.add(Runtime.getRuntime().exec(
                 postprocDirPath + "venv/bin/python " + postprocDirPath + "main.py -h " + outputFileName));

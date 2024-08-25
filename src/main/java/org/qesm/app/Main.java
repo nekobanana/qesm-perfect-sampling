@@ -108,6 +108,7 @@ public class Main {
             double testMaxError = 0.001;
             boolean outputHistogram = true;
             boolean outputSeqDiagram = false;
+            boolean keepSequence = false;
 
             Config config = new Config();
             config.setN(N);
@@ -122,6 +123,7 @@ public class Main {
             config.getStatisticalTestConfig().setError(testMaxError);
             config.setPythonHistogramImage(outputHistogram);
             config.setPythonLastSequenceImage(outputSeqDiagram);
+            config.setKeepSequence(keepSequence);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -173,7 +175,7 @@ public class Main {
         // Perfect Sampling
 
         System.out.println("Running...");
-        PerfectSampler samplerCFTP = new PerfectSampler(P);
+        PerfectSampler samplerCFTP = new PerfectSampler(P, configuration.isKeepSequence());
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
         StatisticalTest statTest = (StatisticalTest) configuration.getStatisticalTestConfig().getTestClass().newInstance();
         statTest.setConfidence(configuration.getStatisticalTestConfig().getConfidence());
@@ -225,7 +227,7 @@ public class Main {
 
     public static void writeFile(Object object, String fileName) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-        writer.write(new ObjectMapper().writeValueAsString(object));
+        writer.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object));
         writer.close();
     }
 }
