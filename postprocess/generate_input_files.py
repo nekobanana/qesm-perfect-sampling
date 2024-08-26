@@ -53,7 +53,8 @@ def main():
         "description": "",
         "pythonHistogramImage": True,
         "pythonLastSequenceImage": False,
-        "n": None  # Questo sarà sostituito
+        "n": None,  # Questo sarà sostituito
+        "keepSequence": False
     }
 
     # Generazione dei file
@@ -72,7 +73,7 @@ def main():
         with open(f'../files/input/{filename}', 'w') as file:
             json.dump(config, file, indent=4)
 
-    print("Generazione dei file completata.")
+    print("Done")
 
 
 if __name__ == "__main__":

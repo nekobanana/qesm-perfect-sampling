@@ -91,7 +91,3 @@ def gaussian(results_json):
     plt.plot(x, pdf, '-', linewidth=3, label='normal')
     plt.show()
     print(f'normal:\t D={D},\t p={p_value}')
-
-if __name__ == '__main__':
-    histogram('results/output26/results.json')
-    # gaussian('results/output22/results.json')

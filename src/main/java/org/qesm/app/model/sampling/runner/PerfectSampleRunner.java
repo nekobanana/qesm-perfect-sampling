@@ -6,9 +6,7 @@ import org.qesm.app.model.sampling.sampler.PerfectSampler;
 import org.qesm.app.model.sampling.sampler.RunResult;
 import org.qesm.app.model.test.StatisticalTest;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -121,9 +119,28 @@ public class PerfectSampleRunner implements SamplerRunner {
     public void waitForOutputWrite() {
         for (Process process : outputWriteProcesses) {
             try {
-                process.waitFor();
+//                process.waitFor();
+                BufferedReader stdInput = new BufferedReader(new
+                        InputStreamReader(process.getInputStream()));
+
+                BufferedReader stdError = new BufferedReader(new
+                        InputStreamReader(process.getErrorStream()));
+
+                // Read the output from the command
+                System.out.println("Here is the standard output of the command:\n");
+                String s = null;
+                while ((s = stdInput.readLine()) != null) {
+                    System.out.println(s);
+                }
+
+                // Read any errors from the attempted command
+                System.out.println("Here is the standard error of the command (if any):\n");
+                while ((s = stdError.readLine()) != null) {
+                    System.out.println(s);
+                }
+
             }
-            catch (InterruptedException e) {
+            catch (IOException e) {
                 // Handle exception that could occur when waiting
                 // for a spawned process to terminate
             }
