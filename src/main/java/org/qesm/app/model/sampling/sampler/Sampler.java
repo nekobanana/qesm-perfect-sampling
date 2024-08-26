@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.qesm.app.model.sampling.aliasmethod.AliasTable;
 import org.qesm.app.model.utils.RandomUtils;
 import org.la4j.Matrix;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 public abstract class Sampler {
     protected final int n;
     protected final Matrix P;
+    protected AliasTable[] aliasTables;
     @JsonIgnore
     protected Random rand;
     @JsonIgnore
@@ -24,27 +26,21 @@ public abstract class Sampler {
         this.n = P.rows();
         this.P = P;
         this.rand = RandomUtils.rand;
+        this.aliasTables = new AliasTable[n];
+        setupAliasTables();
         mapper = new ObjectMapper();
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
-    protected int generateNextStateNumberFromRandomValue(int i, double random) {
-        double leftThreshold;
-        double rightThreshold = 0;
-        for (int j = 0; j < n; j++) {
-            leftThreshold = rightThreshold;
-            rightThreshold = P.get(i, j) + leftThreshold;
-            if (random < rightThreshold) {
-                return j;
-            }
+    private void setupAliasTables() {
+        for (int state = 0; state < n; state++) {
+            aliasTables[state] = new AliasTable(P.getRow(state).toDenseVector().toArray());
         }
-        try {
-            return RandomUtils.getValueFromDistribution(
-                    Arrays.stream(P.getRow(i).toDenseVector().toArray()).boxed().collect(Collectors.toList()));
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating next state number");
-        }
+    }
+
+    protected int generateNextStateNumber(int state, int randomInt, double randomDouble) {
+        return aliasTables[state].sample(randomInt, randomDouble);
     }
 
     public int getN() {return n;}

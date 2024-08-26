@@ -47,13 +47,14 @@ public class PerfectSampler extends Sampler {
 
     private StatesSnapshot generateNewSnapshot() {
         StatesSnapshot newStatesSnapshot = new StatesSnapshot();
-        double random = rand.nextDouble();
+        int randomInt = rand.nextInt(n);
+        double randomDouble = rand.nextDouble();
         for (int i = 0; i < n; i++) {
             // se invece di coupling from the past vado in avanti
             // via via che gli stati coalescono non devo più iterare su tutti
             State s = new State();
             s.setId(i);
-            State nextState = getState(generateNextStateNumberFromRandomValue(i, random), currentTime + 1);
+            State nextState = getState(generateNextStateNumber(i, randomInt, randomDouble), currentTime + 1);
             s.setNext(nextState);
             s.setFlag(nextState.getFlag());
             newStatesSnapshot.addState(i, s);

@@ -21,8 +21,7 @@ public class DumbSampler extends Sampler {
     public Integer runForNSteps(int initialState, int nSteps) {
         sequence.add(initialState);
         for (int i = 0; i < nSteps; i++) {
-            double random = rand.nextDouble();
-            int nextState = generateNextStateNumberFromRandomValue(sequence.get(i), random);
+            int nextState = generateNextStateNumber(sequence.get(i), rand.nextInt(n), rand.nextDouble());
             sequence.add(nextState);
         }
         return sequence.get(sequence.size() - 1);
