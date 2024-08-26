@@ -102,8 +102,6 @@ public class PerfectSampleRunner implements SamplerRunner {
         Files.createDirectories(Paths.get(outputDirPath + dirName));
         String outputFileName = outputDirPath + dirName + "/last_seq.json";
         sampler.writeSequenceToFile(outputFileName);
-        outputWriteProcesses.add(Runtime.getRuntime().exec(
-                postprocDirPath + "venv/bin/python " + postprocDirPath + "main.py -s " + outputFileName));
     }
 
     public void writeResultsOutput(String dirName) throws IOException {
@@ -112,40 +110,9 @@ public class PerfectSampleRunner implements SamplerRunner {
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
         writer.write((new ObjectMapper()).writerWithDefaultPrettyPrinter().writeValueAsString(results));
         writer.close();
-        outputWriteProcesses.add(Runtime.getRuntime().exec(
-                postprocDirPath + "venv/bin/python " + postprocDirPath + "main.py -h " + outputFileName));
     }
 
-    public void waitForOutputWrite() {
-        for (Process process : outputWriteProcesses) {
-            try {
-//                process.waitFor();
-                BufferedReader stdInput = new BufferedReader(new
-                        InputStreamReader(process.getInputStream()));
 
-                BufferedReader stdError = new BufferedReader(new
-                        InputStreamReader(process.getErrorStream()));
-
-                // Read the output from the command
-                System.out.println("Here is the standard output of the command:\n");
-                String s = null;
-                while ((s = stdInput.readLine()) != null) {
-                    System.out.println(s);
-                }
-
-                // Read any errors from the attempted command
-                System.out.println("Here is the standard error of the command (if any):\n");
-                while ((s = stdError.readLine()) != null) {
-                    System.out.println(s);
-                }
-
-            }
-            catch (IOException e) {
-                // Handle exception that could occur when waiting
-                // for a spawned process to terminate
-            }
-        }
-    }
 
     public int getNRuns() {
         return results.size();

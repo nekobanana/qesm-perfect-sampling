@@ -194,7 +194,6 @@ public class Main {
             if (configuration.isPythonLastSequenceImage()) {
                 perfectSampleRunner.writeSequenceOutput(dirName);
             }
-            perfectSampleRunner.waitForOutputWrite();
         } catch (IOException e) {
             System.out.println("Cannot write Perfect sampling output file");
         }
