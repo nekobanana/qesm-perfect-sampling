@@ -4,3 +4,4 @@
 scp target/QESM_perfect_sampling-1.0-SNAPSHOT-jar-with-dependencies.jar giorgi@192.168.3.47:QESM_perfect_sampling.jar
 scp -r files/input giorgi@192.168.3.47:files
 scp script.sh giorgi@192.168.3.47:
+scp postprocess/*.py giorgi@192.168.3.47:postprocess

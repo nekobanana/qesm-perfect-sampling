@@ -11,7 +11,7 @@ for input_file in "${INPUT_FILES_DIR}"/*; do
       extension="${filename##*.}"
       filename="${filename%.*}"
       output_file="${OUTPUT_FILES_DIR}/${filename}.${extension}"
-#      java -jar "$JAR_FILE" -i "$input_file" -o "$output_file"
+      java -jar "$JAR_FILE" -i "$input_file" -o "$output_file"
       "${PYTHON_VENV}" postprocess/main.py -h "${POST_PROCESS_RESULTS_DIR}/${filename}/results.json" -s "${POST_PROCESS_RESULTS_DIR}/last_seq.json"
     fi
 done
