@@ -123,7 +123,6 @@ public class Main {
             config.getStatisticalTestConfig().setError(testMaxError);
             config.setPythonHistogramImage(outputHistogram);
             config.setPythonLastSequenceImage(outputSeqDiagram);
-            config.setKeepSequence(keepSequence);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -175,7 +174,7 @@ public class Main {
         // Perfect Sampling
 
         System.out.println("Running...");
-        PerfectSampler samplerCFTP = new PerfectSampler(P, configuration.isKeepSequence());
+        PerfectSampler samplerCFTP = new PerfectSampler(P, configuration.isPythonLastSequenceImage());
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
         StatisticalTest statTest = (StatisticalTest) configuration.getStatisticalTestConfig().getTestClass().newInstance();
         statTest.setConfidence(configuration.getStatisticalTestConfig().getConfidence());

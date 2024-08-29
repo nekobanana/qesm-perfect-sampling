@@ -12,7 +12,6 @@ public class Config {
     private StatisticalTestConfig statisticalTestConfig = new StatisticalTestConfig();
     private boolean connectSCCs;
     private String description;
-    private boolean keepSequence = false;
 
     private boolean pythonHistogramImage;
     private boolean pythonLastSequenceImage;
@@ -96,15 +95,6 @@ public class Config {
         this.description = description;
 
     }
-
-    public boolean isKeepSequence() {
-        return keepSequence;
-    }
-
-    public void setKeepSequence(boolean keepSequence) {
-        this.keepSequence = keepSequence;
-    }
-
 
     public static class StatisticalTestConfig {
         private double confidence;
