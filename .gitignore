@@ -39,3 +39,6 @@ build/
 /.idea/
 /postprocess/.idea/
 /postprocess/venv/
+/files/output/
+/postprocess/results/
+/postprocess/venv2/
