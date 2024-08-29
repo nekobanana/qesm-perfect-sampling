@@ -3,7 +3,7 @@ INPUT_FILES_DIR=files/input
 OUTPUT_FILES_DIR=files/output
 TABLES_FILES_DIR=tables
 POST_PROCESS_RESULTS_DIR=postprocess/results
-PYTHON_VENV=postprocess/venv/bin/python
+PYTHON_VENV=postprocess/venv2/bin/python
 JAR_FILE=target/QESM_perfect_sampling-1.0-SNAPSHOT-jar-with-dependencies.jar
 for input_file in "${INPUT_FILES_DIR}"/*; do
     if [ -f "$input_file" ]; then

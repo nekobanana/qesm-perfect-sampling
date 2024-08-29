@@ -5,6 +5,8 @@ import os
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import pkg_resources
+
 
 def histogram(results_json):
     # Load the data
@@ -41,7 +43,7 @@ def histogram(results_json):
     for b in [max(steps) - min(steps) + 1, 20]:
         plt.figure(figsize=(10, 6))
         plt.hist(steps, bins=b, density=False, alpha=0.6, color='g', label='Data')
-        plt.savefig(f'{parent_dir}/hist_{b}.png')
+        plt.savefig(f'{parent_dir}/hist{"_"+str(b) if b != max(steps) else ""}.png')
 
     # Plotting the histogram of the data and the best fit distribution
     for b in [max(steps) - min(steps) + 1]:
@@ -50,7 +52,7 @@ def histogram(results_json):
         x = np.linspace(min(steps), max(steps), 1000)
         observed_freq, bin_edges = np.histogram(np.array(steps), bins=b)
         plt.bar(bin_edges[:-1], observed_freq / len(steps), width=np.diff(bin_edges), align="edge", alpha=0.3, color='grey')
-        colormap = plt.colormaps['Set2'].colors
+        colormap = plt.get_cmap('Set2').colors
         color = iter(colormap)
         for dist in results:
             pdf = getattr(stats, dist['name']).pdf(x, *dist['parameters'])
@@ -60,7 +62,7 @@ def histogram(results_json):
         plt.xlabel('Steps')
         plt.ylabel('Density')
         plt.title('Histogram of Steps with Best Fit Distribution')
-        plt.savefig(f'{parent_dir}/hist_fit_{b}.png')
+        plt.savefig(f'{parent_dir}/hist_fit{"_"+str(b) if b != max(steps) else ""}.png')
 
     print(f'Best Fit Distribution: {best_fit["name"]}')
     for dist in results:
@@ -133,3 +135,4 @@ def gaussian(results_json):
     plt.plot(x, pdf, '-', linewidth=3, label='normal')
     plt.show()
     print(f'normal:\t D={D},\t p={p_value}')
+
