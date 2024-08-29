@@ -20,7 +20,10 @@ def histogram(results_json):
 
     for dist_name in distributions:
         dist = getattr(stats, dist_name)
-        param = dist.fit(steps)
+        if dist_name == 'erlang':
+            param = fit_erlang(steps, 10)
+        else:
+            param = dist.fit(steps)
 
         # Kolmogorov-Smirnov test
         D, p_value = stats.kstest(steps, dist_name, args=param)
@@ -70,6 +73,45 @@ def histogram(results_json):
     r_path = os.path.join(parent_dir, 'best_fit.json')
     with open(r_path, 'w') as fp:
         json.dump(r, fp, indent=4)
+
+
+def fit_erlang(data, k_max=10):
+    """
+    By ChatGPT
+
+    Fitta una distribuzione Erlang ai dati forniti.
+
+    Parameters:
+    data (array-like): I dati su cui effettuare il fitting.
+    k_max (int): Il valore massimo da considerare per il parametro k. Default è 10.
+
+    Returns:
+    best_k (int): Il valore ottimale del parametro k.
+    loc (float): Il parametro loc della distribuzione fittata.
+    scale (float): Il parametro scale della distribuzione fittata.
+    fitted_distribution (scipy.stats.rv_continuous): L'oggetto rappresentante la distribuzione Erlang fittata.
+    """
+
+    # Funzione per calcolare la log-verosimiglianza negativa di una distribuzione Gamma/Erlang
+    def negative_log_likelihood(k, data):
+        # Vincola k ad essere intero
+        k = int(np.round(k))
+        loc, scale = 0, np.mean(data) / k  # Stima iniziale per loc e scale
+        nll = -np.sum(stats.gamma.logpdf(data, a=k, loc=loc, scale=scale))
+        return nll
+
+    # Testa diversi valori di k
+    k_values = np.arange(1, k_max + 1)
+    nll_values = [negative_log_likelihood(k, data) for k in k_values]
+
+    # Trova il valore di k che minimizza la log-verosimiglianza negativa
+    best_k = k_values[np.argmin(nll_values)]
+
+    # Calcola i parametri finali della distribuzione Erlang fittata
+    loc, scale = 0, np.mean(data) / best_k
+    # fitted_distribution = stats.gamma(a=best_k, loc=loc, scale=scale)
+
+    return int(best_k), loc, scale
 
 
 def gaussian(results_json):

@@ -2,6 +2,7 @@ import json
 def main():
     # Definizione della tabella dei valori
     table = [
+        [4, 2, -2, 2],
         [16, 2, -2, 2],
         [16, 2, -4, 4],
         [16, 2, -8, 8],
@@ -54,7 +55,6 @@ def main():
         "pythonHistogramImage": True,
         "pythonLastSequenceImage": False,
         "n": None,  # Questo sarà sostituito
-        "keepSequence": False
     }
 
     # Generazione dei file
@@ -65,9 +65,11 @@ def main():
         config["edgesLocalityDistribution"]["min"] = outgoing_edges_min
         config["edgesLocalityDistribution"]["max"] = outgoing_edges_max
         config["n"] = N
+        if index == 0:
+            config["pythonLastSequenceImage"] = True
 
         # Nome del file
-        filename = f"input{index}.json"
+        filename = f"{index}.json"
 
         # Scrittura del file JSON
         with open(f'../files/input/{filename}', 'w') as file:
