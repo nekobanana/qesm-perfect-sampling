@@ -8,10 +8,10 @@ import pandas as pd
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 
-def main():
+def generate_RQ2_table(java_results_dir, table_path):
     results = defaultdict(lambda: [])
-    for output_file in os.listdir('../files/output'):
-        output_file_path = os.path.join('../files/output', output_file)
+    for output_file in os.listdir(java_results_dir):
+        output_file_path = os.path.join(java_results_dir, output_file)
         output_json = json.load(open(output_file_path))
         results['file-name'].append(output_json['fileName'])
         results['N'].append(output_json['config']['n'])
@@ -32,8 +32,8 @@ def main():
         results['d2-distance'].append(f"{output_json['dumbSamplingOutputs'][2]['distance']:.3E}")
     df = pd.DataFrame.from_dict(results)
     df = df.sort_values(by=['N', 'edges-number', 'locality-max'])
-    df.to_csv('../files/perfect-dumb-analysis.csv', index=False)
+    df.to_csv(table_path, index=False)
     pass
 
 if __name__ == '__main__':
-    main()
+    generate_RQ2_table(java_results_dir='../files/output', table_path='../files/perfect-dumb-analysis.csv')
