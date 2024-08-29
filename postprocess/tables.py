@@ -7,7 +7,7 @@ from generate_table import generate_RQ1_table
 from perfect_dumb_analysis import generate_RQ2_table
 
 def main(argument_list):
-    options = "t"
+    options = "t:"
     long_options = ["tables"]
     try:
         arguments, values = getopt.getopt(argument_list, options, long_options)

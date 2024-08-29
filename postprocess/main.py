@@ -34,7 +34,7 @@ def sequence_diagram(sequence_json):
     plt.savefig(f'{parent_dir}/sequence_cftp.png')
 
 def main(argument_list):
-    options = "h:s"
+    options = "h:s:"
     long_options = ["histogram", "sequence"]
     try:
         arguments, values = getopt.getopt(argument_list, options, long_options)
