@@ -1,6 +1,4 @@
 import getopt
-import json
-import os
 import sys
 
 from generate_table import generate_RQ1_table
@@ -14,10 +12,10 @@ def main(argument_list):
         for current_argument, current_value in arguments:
             if current_argument in ("-t", "--tables"):
                 print('Generating tables...')
-                paths = current_value.split(';')
+                paths = current_value.split(':')
                 assert (len(paths) == 4)
                 generate_RQ1_table(java_results_dir=paths[0], table1_path=paths[1], table2_path=paths[2])
-                generate_RQ2_table(java_results_dir=paths[0], table_path=paths[1])
+                generate_RQ2_table(java_results_dir=paths[0], table_path=paths[3])
     except getopt.error as err:
         print(str(err))
 
