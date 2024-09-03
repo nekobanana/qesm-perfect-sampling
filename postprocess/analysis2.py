@@ -1,11 +1,11 @@
 import json
 import math
 import os
+import sys
 
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
-import pkg_resources
 
 
 def histogram(results_json):
@@ -52,7 +52,7 @@ def histogram(results_json):
         x = np.linspace(min(steps), max(steps), 1000)
         observed_freq, bin_edges = np.histogram(np.array(steps), bins=b)
         plt.bar(bin_edges[:-1], observed_freq / len(steps), width=np.diff(bin_edges), align="edge", alpha=0.3, color='grey')
-        colormap = plt.get_cmap('Set2').colors
+        colormap = plt.colormaps['Set2'].colors
         color = iter(colormap)
         for dist in results:
             pdf = getattr(stats, dist['name']).pdf(x, *dist['parameters'])
@@ -115,24 +115,5 @@ def fit_erlang(data, k_max=10):
 
     return int(best_k), loc, scale
 
-
-def gaussian(results_json):
-    # Load the data
-    with open(results_json) as f:
-        data = json.load(f)
-    parent_dir = os.path.dirname(os.path.join(results_json))
-    steps = [entry['steps'] for entry in data]
-    log_steps = [math.log(s) for s in steps]
-    norm = getattr(stats, 'norm')
-    param = norm.fit(log_steps)
-    D, p_value = stats.kstest(log_steps, 'norm', args=param)
-
-    # b = int(max(steps) - min(steps) + 1)
-    plt.figure(figsize=(10, 6))
-    plt.hist(log_steps, density=True, bins=50, alpha=0.6, label='Data')
-    x = np.linspace(min(log_steps), max(log_steps), 1000)
-    pdf = norm.pdf(x, *param)
-    plt.plot(x, pdf, '-', linewidth=3, label='normal')
-    plt.show()
-    print(f'normal:\t D={D},\t p={p_value}')
-
+if __name__ == '__main__':
+    histogram('results/1/results.json')

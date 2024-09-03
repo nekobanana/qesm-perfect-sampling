@@ -5,6 +5,7 @@ import sys
 
 import matplotlib.pyplot as plt
 
+from ColormapIterator import ColormapIterator
 from analysis2 import histogram
 
 
@@ -21,11 +22,11 @@ def sequence_diagram(sequence_json):
             if state['nextStateId'] is not None:
                 plt.plot([time, time + 1], [stateId, state['nextStateId']], c='black', linewidth=0.7)
 
-    color = ColormapIterator(plt.get_cmap('Set2').colors)
+    color = ColormapIterator(plt.colormaps['Set2'].colors)
     for stateId in range(n):
         c = next(color)
         prev_state_id = stateId
-        for t, s in dict(reversed(list(data['sequence'].items()))).items():
+        for t, s in reversed(data['sequence'].items()):
             state = s['states'][f'{prev_state_id}']
             time = s['time']
             if state['nextStateId'] is not None:
@@ -41,28 +42,19 @@ def main(argument_list):
         for current_argument, current_value in arguments:
             if current_argument in ("-h", "--histogram"):
                 print('Generating histogram...')
-                histogram(current_value)
+                try:
+                    histogram(current_value)
+                except Exception as e:
+                    print(e)
             elif current_argument in ("-s", "--sequence"):
                 print('Generating sequence image...')
-                sequence_diagram(current_value)
+                try:
+                    sequence_diagram(current_value)
+                except Exception as e:
+                    print(e)
     except getopt.error as err:
         print(str(err))
 
-
-class ColormapIterator:
-    def __init__(self, cmap):
-        self._cmap = cmap
-        self.cmap = iter(cmap[:])
-
-    def __iter__(self):
-        while True:
-            try:
-                yield next(self.cmap)
-            except StopIteration:
-                self.cmap = iter(self._cmap[:])
-
-    def __next__(self):
-        return next(self.__iter__())
 
 
 if __name__ == '__main__':

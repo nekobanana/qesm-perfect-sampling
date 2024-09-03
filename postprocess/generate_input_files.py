@@ -47,7 +47,7 @@ def main():
         "seed": None,
         "statisticalTestConfig": {
             "confidence": 0.95,
-            "error": 0.01,
+            "error": 0.001,
             "testClass": "org.qesm.app.model.test.ZTest"
           },
         "connectSCCs": False,
