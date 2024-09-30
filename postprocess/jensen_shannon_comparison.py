@@ -40,7 +40,7 @@ def extend_histogram(observed_freq, bin_edges, min_value, max_value):
     return new_observed_freq, new_bin_edges
 
 
-def main(results_json_1, results_json_2):
+def main(results_json_1, results_json_2, name1, name2):
     experiment_name = os.path.basename(os.path.dirname(results_json_1))
     assert experiment_name == os.path.basename(os.path.dirname(results_json_2))
     histogram1, steps1 = get_histogram(results_json_1)
@@ -53,9 +53,23 @@ def main(results_json_1, results_json_2):
     dist2 = histogram2[0] / np.linalg.norm(histogram2)
     div_js = distance.jensenshannon(dist1, dist2)
     print(f'Jensen-Shannon divergence: {div_js}')
-    plot_dists([steps1, steps2], [results_json_1, results_json_2], f'jensen_shannon/{experiment_name}')
-    # plot_dists([histogram1], [results_json_1])
-    pass
+    plot_dists([steps1, steps2], [name1, name2], f'jensen_shannon/{experiment_name}')
+    summary = {
+        'distributions': [
+            {
+                'path': results_json_1,
+                'description': name1
+            },
+            {
+                'path': results_json_2,
+                'description': name2
+            }
+        ],
+        'jensen-shannon-divergence': div_js,
+        'graph': experiment_name
+    }
+    with open(f'jensen_shannon/{experiment_name}.json', 'w') as fp:
+        json.dump(summary, fp, indent=4)
 
 def plot_dists(steps_dists, names, image_name):
     plt.figure(figsize=(10, 6))
