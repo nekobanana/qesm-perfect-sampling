@@ -10,7 +10,7 @@ def main1():
 
     # Extract the 'steps' values
     steps = [entry['steps'] for entry in data]
-    max_bins = np.arange(0, max(steps) + 1)
+    max_bins = np.arange(0, max(steps))
 
     # Plot the histogram
     plt.hist(steps, bins=max_bins, density=False, alpha=0.6, color='g')

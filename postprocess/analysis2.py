@@ -39,7 +39,7 @@ def histogram(results_json):
     # Find the best fit based on the highest p-value
     best_fit = max(results, key=lambda x: x['p-value'])
     # best_dist_name, best_D, best_p_value, best_param = best_fit
-    bins = max(steps) - min(steps) + 1
+    bins = max(steps) - min(steps)
     for b in [bins, 20]:
         plt.figure(figsize=(10, 6))
         plt.hist(steps, bins=b, density=False, alpha=0.6, color='g', label='Data')
@@ -47,7 +47,7 @@ def histogram(results_json):
 
     # Plotting the histogram of the data and the best fit distribution
     for b in [bins]:
-    # for b in [max(steps) - min(steps) + 1, 20]:
+    # for b in [max(steps) - min(steps), 20]:
         plt.figure(figsize=(10, 6))
         x = np.linspace(min(steps), max(steps), 1000)
         observed_freq, bin_edges = np.histogram(np.array(steps), bins=b)

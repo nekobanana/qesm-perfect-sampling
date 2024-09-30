@@ -1,9 +1,9 @@
 #!/bin/bash
 INPUT_FILES_DIR=files/input
-OUTPUT_FILES_DIR=files/output
-TABLES_FILES_DIR=tables
+OUTPUT_FILES_DIR=results_history/20240926-172746/files/output
+TABLES_FILES_DIR=results_history/20240926-172746/tables
 POST_PROCESS_RESULTS_DIR=postprocess/results
-PYTHON_VENV=postprocess/venv2/bin/python
+PYTHON_VENV=postprocess/venv/bin/python
 JAR_FILE=target/QESM_perfect_sampling-1.0-SNAPSHOT-jar-with-dependencies.jar
 for input_file in "${INPUT_FILES_DIR}"/*; do
     if [ -f "$input_file" ]; then
@@ -16,7 +16,7 @@ for input_file in "${INPUT_FILES_DIR}"/*; do
       "${PYTHON_VENV}" postprocess/main.py -h "${POST_PROCESS_RESULTS_DIR}/${filename}/results.json" -s "${POST_PROCESS_RESULTS_DIR}/${filename}/last_seq.json"
     fi
 done
-"${PYTHON_VENV}" postprocess/tables.py -t "${OUTPUT_FILES_DIR};${TABLES_FILES_DIR}/table_1_1.csv;${TABLES_FILES_DIR}/table_1_2.csv;../${TABLES_FILES_DIR}/table_perfect_dumb.csv"
+"${PYTHON_VENV}" postprocess/tables.py -t "${OUTPUT_FILES_DIR};${TABLES_FILES_DIR}/table_1_1.csv;${TABLES_FILES_DIR}/table_1_2.csv;${TABLES_FILES_DIR}/table_perfect_dumb.csv"
 
 
 

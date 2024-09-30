@@ -47,11 +47,11 @@ def main():
         "seed": None,
         "statisticalTestConfig": {
             "confidence": 0.95,
-            "error": 0.001,
+            "error": 0.01,
             "testClass": "org.qesm.app.model.test.ZTest"
           },
         "connectSCCs": False,
-        "description": "",
+        "description": "N random values",
         "pythonHistogramImage": True,
         "pythonLastSequenceImage": False,
         "n": None,  # Questo sarà sostituito
