@@ -1,0 +1,53 @@
+{
+  "fileName" : "14.json",
+  "config" : {
+    "edgesNumberDistribution" : {
+      "n" : 6,
+      "distributionType" : "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+    },
+    "edgesLocalityDistribution" : {
+      "min" : -6,
+      "max" : 6,
+      "distributionType" : "org.qesm.app.model.generator.distribution.UniformDistribution"
+    },
+    "selfLoopValue" : null,
+    "seed" : -873486318,
+    "statisticalTestConfig" : {
+      "confidence" : 0.95,
+      "error" : 0.01,
+      "testClass" : "org.qesm.app.model.test.ZTest"
+    },
+    "connectSCCs" : false,
+    "description" : "",
+    "pythonHistogramImage" : true,
+    "pythonLastSequenceImage" : false,
+    "n" : 64
+  },
+  "perfectSamplingOutput" : {
+    "avgSteps" : 127.31789,
+    "sigma" : 73.03847137432402,
+    "distance" : 1.500168218906316E-4,
+    "statisticalTest" : {
+      "name" : "ZTest",
+      "confidence" : 0.95,
+      "maxError" : 0.01,
+      "currentError" : 0.009999661146888626,
+      "samplesSize" : 12643,
+      "stdDev" : 73.03847076195582,
+      "mean" : 127.31788341374674
+    }
+  },
+  "dumbSamplingOutputs" : [ {
+    "sigmas" : 0,
+    "steps" : 127,
+    "distance" : 1.375589241029533E-4
+  }, {
+    "sigmas" : 1,
+    "steps" : 200,
+    "distance" : 1.349288301623114E-4
+  }, {
+    "sigmas" : 2,
+    "steps" : 273,
+    "distance" : 1.5421951195173476E-4
+  } ]
+}
