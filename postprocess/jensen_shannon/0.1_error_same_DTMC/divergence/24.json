@@ -1,0 +1,14 @@
+{
+    "distributions": [
+        {
+            "path": "../results_history/same_DTMC/20241001-225331-single-random-0.01/results/24/results.json",
+            "description": "1 random"
+        },
+        {
+            "path": "../results_history/same_DTMC/20241001-004925-N-random-0.01/results/24/results.json",
+            "description": "N random"
+        }
+    ],
+    "jensen-shannon-divergence": 0.2130867682948246,
+    "graph": "24"
+}
