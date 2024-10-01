@@ -9,7 +9,7 @@
         "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
     },
     "selfLoopValue": null,
-    "seed": null,
+    "seed": 1348621232,
     "statisticalTestConfig": {
         "confidence": 0.95,
         "error": 0.01,
