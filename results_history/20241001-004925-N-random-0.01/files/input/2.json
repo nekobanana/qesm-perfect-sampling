@@ -1,0 +1,23 @@
+{
+    "edgesNumberDistribution": {
+        "n": 2,
+        "distributionType": "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+    },
+    "edgesLocalityDistribution": {
+        "min": -4,
+        "max": 4,
+        "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
+    },
+    "selfLoopValue": null,
+    "seed": null,
+    "statisticalTestConfig": {
+        "confidence": 0.95,
+        "error": 0.001,
+        "testClass": "org.qesm.app.model.test.ZTest"
+    },
+    "connectSCCs": false,
+    "description": "N random values",
+    "pythonHistogramImage": true,
+    "pythonLastSequenceImage": false,
+    "n": 16
+}

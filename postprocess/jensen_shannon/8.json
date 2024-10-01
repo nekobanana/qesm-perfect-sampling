@@ -1,0 +1,14 @@
+{
+    "distributions": [
+        {
+            "path": "../results_history/20240830-091844/results/8/results.json",
+            "description": "1 random"
+        },
+        {
+            "path": "../results_history/20240926-172746-N-random/results/8/results.json",
+            "description": "N random"
+        }
+    ],
+    "jensen-shannon-divergence": 0.5111363972903824,
+    "graph": "8"
+}
