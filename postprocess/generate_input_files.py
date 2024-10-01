@@ -51,7 +51,7 @@ def main():
             "testClass": "org.qesm.app.model.test.ZTest"
           },
         "connectSCCs": False,
-        "description": "N random values",
+        "description": "single random value",
         "pythonHistogramImage": True,
         "pythonLastSequenceImage": False,
         "n": None,  # Questo sarà sostituito

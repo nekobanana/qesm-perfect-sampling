@@ -1,7 +1,5 @@
 import json
 import os
-import sys
-from os import path
 from pathlib import Path
 
 import numpy as np
@@ -14,20 +12,11 @@ def get_histogram(results_json):
     steps = [entry['steps'] for entry in data]
     bins = max(steps) - min(steps)
     observed_freq, bin_edges = np.histogram(np.array(steps), bins=bins)
-    # plt.hist(steps, bins=bins, density=False, alpha=0.6, label='Data')
     return (observed_freq, bin_edges), steps
 
 def extend_histogram(observed_freq, bin_edges, min_value, max_value):
-    # hist_min = bin_edges[0]
-    # hist_max = bin_edges[-1]
     new_observed_freq = []
     new_bin_edges = []
-    # if hist_min > min_value:
-    #     new_observed_freq.extend([0] * (min_value - hist_min))
-    #     new_bin_edges.extend([0] * (min_value - hist_min))
-    # if hist_max < min_value:
-    #     new_observed_freq.extend([0] * (hist_max - max_value))
-    #     new_bin_edges.extend([0] * (hist_max - max_value))
     hist_idx = 0
     for n in range(int(min_value), int(max_value) + 1):
         if hist_idx < len(observed_freq) and bin_edges[hist_idx] == n:
@@ -53,7 +42,9 @@ def main(results_json_1, results_json_2, name1, name2):
     dist2 = histogram2[0] / np.linalg.norm(histogram2)
     div_js = distance.jensenshannon(dist1, dist2)
     print(f'Jensen-Shannon divergence: {div_js}')
-    plot_dists([steps1, steps2], [name1, name2], f'jensen_shannon/{experiment_name}')
+    plot_dists([steps1, steps2], [name1, name2], f'jensen_shannon/freq/{experiment_name}', False)
+    plot_dists([steps1, steps2], [name1, name2], f'jensen_shannon/pdf/{experiment_name}', True)
+    plot_CDFs([steps1, steps2], [name1, name2], f'jensen_shannon/cdf/{experiment_name}')
     summary = {
         'distributions': [
             {
@@ -68,25 +59,42 @@ def main(results_json_1, results_json_2, name1, name2):
         'jensen-shannon-divergence': div_js,
         'graph': experiment_name
     }
-    with open(f'jensen_shannon/{experiment_name}.json', 'w') as fp:
+    with open(f'jensen_shannon/0.1_error_same_DTMC/divergence/{experiment_name}.json', 'w') as fp:
         json.dump(summary, fp, indent=4)
 
-def plot_dists(steps_dists, names, image_name):
+def plot_dists(steps_dists, names, image_name, normalized=False):
     plt.figure(figsize=(10, 6))
     for steps, name in zip(steps_dists, names):
-        plt.hist(steps, bins=max(steps)-min(steps), density=False, alpha=0.6, label=name)
+        plt.hist(steps, bins=max(steps)-min(steps), density=normalized, alpha=0.6, label=name)
         plt.legend(loc="upper right")
-        # plt.ylim([0, 1.05 * bin_edges[-1]])
         plt.xlabel('Steps')
-        plt.ylabel('Frequency')
+        plt.ylabel('pdf')
         plt.title('Comparison between experiments using 1 random value and N random values')
-    plt.savefig(image_name)
+    plt.savefig(f'{image_name}_pdf.png')
+    plt.close()
+
+def plot_CDFs(steps_dists, names, image_name):
+    plt.figure(figsize=(10, 6))
+    for steps, name in zip(steps_dists, names):
+        plt.ecdf(steps, label=name)
+        plt.legend(loc="upper right")
+        plt.xlabel('Steps')
+        plt.ylabel('CDF')
+        plt.title('Comparison between experiments using 1 random value and N random values')
+    plt.savefig(f'{image_name}_CDF.png')
+    plt.close()
+
+
 
 if __name__ == '__main__':
+    Path(f'jensen_shannon/freq', exist_ok=True)
+    Path(f'jensen_shannon/0.1_error_same_DTMC/pdf', exist_ok=True)
+    Path(f'jensen_shannon/0.1_error_same_DTMC/cdf', exist_ok=True)
+    Path(f'jensen_shannon/0.1_error_same_DTMC/divergence', exist_ok=True)
     for n in range(1, 28):
         try:
-            results_json_1 = f'../results_history/20240830-091844/results/{n}/results.json'
-            results_json_2 = f'../results_history/20240926-172746-N-random/results/{n}/results.json'
+            results_json_1 = f'../results_history/same_DTMC/20241001-225331-single-random-0.01/results/{n}/results.json'
+            results_json_2 = f'../results_history/same_DTMC/20241001-004925-N-random-0.01/results/{n}/results.json'
             desc1 = f'1 random'
             desc2 = f'N random'
             main(results_json_1, results_json_2, desc1, desc2)

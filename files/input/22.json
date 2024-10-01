@@ -16,7 +16,7 @@
         "testClass": "org.qesm.app.model.test.ZTest"
     },
     "connectSCCs": false,
-    "description": "N random values",
+    "description": "single random value",
     "pythonHistogramImage": true,
     "pythonLastSequenceImage": false,
     "n": 256
