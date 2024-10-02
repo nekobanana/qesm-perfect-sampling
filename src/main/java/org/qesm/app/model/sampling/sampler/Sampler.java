@@ -34,8 +34,16 @@ public abstract class Sampler {
     }
 
     private void setupAliasTables() {
-        for (int state = 0; state < n; state++) {
-            aliasTables[state] = new AliasTable(P.getRow(state).toDenseVector().toArray());
+        double[] pRow = new double[n*n];
+        for (int i = 0; i < n*n; i++) {
+            for (int state1 = 0; state1 < n; state1++) {
+                double p = 1;
+                for (int state2 = 0; state2 < n; state2++) {
+                    p *= P.get(state2, state1);
+                }
+        }
+
+//            aliasTables[state] = new AliasTable(P.getRow(state).toDenseVector().toArray());
         }
     }
 
