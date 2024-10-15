@@ -17,6 +17,7 @@
     },
     "connectSCCs": false,
     "description": "single random value",
+    "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
     "pythonHistogramImage": true,
     "pythonLastSequenceImage": true,
     "n": 4

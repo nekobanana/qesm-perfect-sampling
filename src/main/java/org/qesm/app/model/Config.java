@@ -1,6 +1,8 @@
 package org.qesm.app.model;
 
 import org.qesm.app.model.generator.distribution.Distribution;
+import org.qesm.app.model.sampling.sampler.random.RandomHelper;
+import org.qesm.app.model.test.StatisticalTest;
 
 public class Config {
     private int N;
@@ -8,8 +10,8 @@ public class Config {
     private Distribution edgesLocalityDistribution;
     private Double selfLoopValue;
     private Long seed;
-//    private int dtmcNumber;
     private StatisticalTestConfig statisticalTestConfig = new StatisticalTestConfig();
+    private Class<? extends RandomHelper> randomHelperClass;
     private boolean connectSCCs;
     private String description;
 
@@ -96,10 +98,18 @@ public class Config {
 
     }
 
+    public Class<? extends RandomHelper> getRandomHelperClass() {
+        return randomHelperClass;
+    }
+
+    public void setRandomHelperClass(Class<? extends RandomHelper> randomHelperClass) {
+        this.randomHelperClass = randomHelperClass;
+    }
+
     public static class StatisticalTestConfig {
         private double confidence;
         private double error;
-        private Class testClass;
+        private Class<? extends StatisticalTest> testClass;
 
         public double getConfidence() {
             return confidence;
@@ -117,11 +127,11 @@ public class Config {
             this.error = error;
         }
 
-        public Class getTestClass() {
+        public Class<? extends StatisticalTest> getTestClass() {
             return testClass;
         }
 
-        public void setTestClass(Class testClass) {
+        public void setTestClass(Class<? extends StatisticalTest> testClass) {
             this.testClass = testClass;
         }
     }

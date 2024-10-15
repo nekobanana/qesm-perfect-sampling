@@ -1,12 +1,15 @@
 package org.qesm.app.model.sampling.sampler;
 
 import org.la4j.Matrix;
+import org.qesm.app.model.sampling.sampler.random.RandomHelper;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class PerfectSampler extends Sampler {
 
@@ -14,14 +17,16 @@ public class PerfectSampler extends Sampler {
     private int currentTime = 0;
     private final boolean keepSequence;
     private int keepSequenceLength = 2;
+    private final RandomHelper randomHelper;
 
-    public PerfectSampler(Matrix P, boolean keepSequence) {
+    public PerfectSampler(Matrix P, Class<? extends RandomHelper> randomHelperClass, boolean keepSequence) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(P);
         this.keepSequence = keepSequence;
+        this.randomHelper = randomHelperClass.getConstructor(Random.class, Integer.class).newInstance(rand, n);
     }
 
-    public PerfectSampler(Matrix P) {
-        this(P, false);
+    public PerfectSampler(Matrix P, Class<? extends RandomHelper> randomHelperClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        this(P, randomHelperClass, false);
     }
 
     @Override
@@ -47,14 +52,12 @@ public class PerfectSampler extends Sampler {
 
     private StatesSnapshot generateNewSnapshot() {
         StatesSnapshot newStatesSnapshot = new StatesSnapshot();
-        int randomInt = rand.nextInt(n);
-        double randomDouble = rand.nextDouble();
+        randomHelper.init();
         for (int i = 0; i < n; i++) {
-            // se invece di coupling from the past vado in avanti
-            // via via che gli stati coalescono non devo più iterare su tutti
             State s = new State();
             s.setId(i);
-            State nextState = getState(generateNextStateNumber(i, randomInt, randomDouble), currentTime + 1);
+            State nextState = getState(generateNextStateNumber(i, randomHelper.getRandomInt(), randomHelper.getRandomDouble()), currentTime + 1);
+//            State nextState = getState(generateNextStateNumber(i, randomHelper.getRandomInt(), randomHelper.getRandomDouble()), currentTime + 1);
             s.setNext(nextState);
             s.setFlag(nextState.getFlag());
             newStatesSnapshot.addState(i, s);

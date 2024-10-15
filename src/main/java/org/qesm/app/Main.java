@@ -16,6 +16,8 @@ import org.qesm.app.model.sampling.runner.DumbSampleRunner;
 import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
 import org.qesm.app.model.sampling.sampler.DumbSampler;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
+import org.qesm.app.model.sampling.sampler.random.RandomHelper;
+import org.qesm.app.model.sampling.sampler.random.SingleRandomHelper;
 import org.qesm.app.model.test.StatisticalTest;
 import org.qesm.app.model.test.StudentTTest;
 import org.qesm.app.model.test.ZTest;
@@ -28,6 +30,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Random;
@@ -97,7 +100,6 @@ public class Main {
     public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
             int N = 16;
-//            int dtmcNumber = 10;
             boolean connectSCCs = false;
             Distribution edgesNumberDistribution = new SingleValueDistribution( 4);
             Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
@@ -108,11 +110,10 @@ public class Main {
             double testMaxError = 0.001;
             boolean outputHistogram = true;
             boolean outputSeqDiagram = false;
-            boolean keepSequence = false;
+            Class randomHelperClass = SingleRandomHelper.class;
 
             Config config = new Config();
             config.setN(N);
-//            config.setDtmcNumber(dtmcNumber);
             config.setConnectSCCs(connectSCCs);
             config.setEdgesNumberDistribution(edgesNumberDistribution);
             config.setEdgesLocalityDistribution(edgesLocalityDistribution);
@@ -121,6 +122,7 @@ public class Main {
             config.getStatisticalTestConfig().setTestClass(testClass);
             config.getStatisticalTestConfig().setConfidence(testConfidence);
             config.getStatisticalTestConfig().setError(testMaxError);
+            config.setRandomHelperClass(randomHelperClass);
             config.setPythonHistogramImage(outputHistogram);
             config.setPythonLastSequenceImage(outputSeqDiagram);
             writeFile(config, configOutputFile);
@@ -130,16 +132,14 @@ public class Main {
             Output output = null;
             try {
                 output = runExperiment(config, new File(outputFilePath).getName());
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            } catch (InstantiationException e) {
+            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
             writeFile(output, outputFilePath);
         }
     }
 
-    public static Output runExperiment(Config configuration, String outputFileName) throws IllegalAccessException, InstantiationException {
+    public static Output runExperiment(Config configuration, String outputFileName) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
 
         long seed;
         if (configuration.getSeed() != null) {
@@ -174,9 +174,9 @@ public class Main {
         // Perfect Sampling
 
         System.out.println("Running...");
-        PerfectSampler samplerCFTP = new PerfectSampler(P, configuration.isPythonLastSequenceImage());
+        PerfectSampler samplerCFTP = new PerfectSampler(P, configuration.getRandomHelperClass(), configuration.isPythonLastSequenceImage());
         PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
-        StatisticalTest statTest = (StatisticalTest) configuration.getStatisticalTestConfig().getTestClass().newInstance();
+        StatisticalTest statTest = (StatisticalTest) configuration.getStatisticalTestConfig().getTestClass().getDeclaredConstructor().newInstance();
         statTest.setConfidence(configuration.getStatisticalTestConfig().getConfidence());
         statTest.setMaxError(configuration.getStatisticalTestConfig().getError());
         perfectSampleRunner.run(statTest);
