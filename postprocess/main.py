@@ -12,7 +12,7 @@ from analysis2 import histogram
 def sequence_diagram(sequence_json):
     parent_dir = os.path.dirname(os.path.join(sequence_json))
     data = json.load(open(sequence_json))
-    n = data['P']['rows']
+    n = data['n']
     plt.figure(figsize=(len(data['sequence'])*2, 6), dpi=200)
     for t, s in data['sequence'].items():
         time = s['time']

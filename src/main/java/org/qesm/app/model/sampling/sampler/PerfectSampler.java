@@ -85,7 +85,15 @@ public class PerfectSampler extends Sampler {
 
     public void writeSequenceToFile(String fileName)
             throws IOException {
-        String json = mapper.writeValueAsString(this);
+        class SequenceJson {
+            public Map<Integer, StatesSnapshot> sequence;
+            public int n;
+            public SequenceJson(Map<Integer, StatesSnapshot> sequence, int n) {
+                this.sequence = sequence;
+                this.n = n;
+            }
+        }
+        String json = mapper.writeValueAsString(new SequenceJson(sequence, n));
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
         writer.write(json);
         writer.close();
