@@ -9,17 +9,14 @@ import org.qesm.app.model.Config;
 import org.qesm.app.model.Output;
 import org.qesm.app.model.generator.DTMCGenerator;
 import org.qesm.app.model.generator.distribution.Distribution;
-import org.qesm.app.model.generator.distribution.ManualDistribution;
 import org.qesm.app.model.generator.distribution.SingleValueDistribution;
 import org.qesm.app.model.generator.distribution.UniformDistribution;
 import org.qesm.app.model.sampling.runner.DumbSampleRunner;
 import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
 import org.qesm.app.model.sampling.sampler.DumbSampler;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
-import org.qesm.app.model.sampling.sampler.random.RandomHelper;
 import org.qesm.app.model.sampling.sampler.random.SingleRandomHelper;
 import org.qesm.app.model.test.StatisticalTest;
-import org.qesm.app.model.test.StudentTTest;
 import org.qesm.app.model.test.ZTest;
 import org.qesm.app.model.utils.Metrics;
 import org.qesm.app.model.utils.RandomUtils;
@@ -31,9 +28,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Random;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -51,6 +48,28 @@ public class Main {
                 .collect(Collectors.toMap(e -> (int)e.getKey(), Map.Entry::getValue));
     }
 
+    public static Map<Integer, Matrix> transientAnalysis(Matrix P, Map<Integer, Double> steadyStateDistribution, double error) {
+        assert(P.rows() == P.columns());
+        int n = P.rows();
+        double[] pi_0_arr = new double[n];
+        Arrays.fill(pi_0_arr, (double) 1 /n);
+        Matrix pi_0 = Matrix.from1DArray(1, n, pi_0_arr);
+        double[] ssDist_arr = new double[n];
+        for (int i = 0; i < n; i++) {
+            ssDist_arr[i] = steadyStateDistribution.getOrDefault(i, 0.);
+        }
+        Matrix ssDist = Matrix.from1DArray(1, n, ssDist_arr);
+        Matrix pi_n = pi_0.copy();
+        Map<Integer, Matrix> results = new HashMap<>();
+        int t = 0;
+        results.put(t, pi_n);
+        while (ssDist.subtract(pi_n).norm() > error) {
+            t++;
+            pi_n = pi_n.multiply(P);
+            results.put(t, pi_n);
+        }
+        return results;
+    }
 
     public static void main(String[] args) {
         Options options = new Options();
@@ -99,32 +118,42 @@ public class Main {
 
     public static void configExperiment(String inputFilePath, String outputFilePath, String configOutputFile) throws IOException {
         if (configOutputFile != null) { // Only to generate configuration file, no experiment
-            int N = 16;
+            int N = 4;
             boolean connectSCCs = false;
             Distribution edgesNumberDistribution = new SingleValueDistribution( 4);
             Distribution edgesLocalityDistribution = new UniformDistribution(-2, 2);
             Double selfLoopValue = null;
             String description = "";
-            Class testClass = ZTest.class;
+            Class<ZTest> testClass = ZTest.class;
             double testConfidence = 0.95;
             double testMaxError = 0.001;
             boolean outputHistogram = true;
             boolean outputSeqDiagram = false;
-            Class randomHelperClass = SingleRandomHelper.class;
+            Class<SingleRandomHelper> randomHelperClass = SingleRandomHelper.class;
 
             Config config = new Config();
-            config.setN(N);
-            config.setConnectSCCs(connectSCCs);
-            config.setEdgesNumberDistribution(edgesNumberDistribution);
-            config.setEdgesLocalityDistribution(edgesLocalityDistribution);
-            config.setSelfLoopValue(selfLoopValue);
             config.setDescription(description);
-            config.getStatisticalTestConfig().setTestClass(testClass);
-            config.getStatisticalTestConfig().setConfidence(testConfidence);
-            config.getStatisticalTestConfig().setError(testMaxError);
-            config.setRandomHelperClass(randomHelperClass);
-            config.setPythonHistogramImage(outputHistogram);
-            config.setPythonLastSequenceImage(outputSeqDiagram);
+            config.setDtmcGeneratorConfig(new Config.DTMCGeneratorConfig());
+            config.getDtmcGeneratorConfig().setN(N);
+            config.getDtmcGeneratorConfig().setConnectSCCs(connectSCCs);
+            config.getDtmcGeneratorConfig().setEdgesNumberDistribution(edgesNumberDistribution);
+            config.getDtmcGeneratorConfig().setEdgesLocalityDistribution(edgesLocalityDistribution);
+            config.getDtmcGeneratorConfig().setSelfLoopValue(selfLoopValue);
+            config.setPerfectSamplingConfig(new Config.PerfectSamplingConfig());
+            config.getPerfectSamplingConfig().setEnabled(true);
+            config.getPerfectSamplingConfig().getStatisticalTestConfig().setTestClass(testClass);
+            config.getPerfectSamplingConfig().getStatisticalTestConfig().setConfidence(testConfidence);
+            config.getPerfectSamplingConfig().getStatisticalTestConfig().setError(testMaxError);
+            config.getPerfectSamplingConfig().setRandomHelperClass(randomHelperClass);
+            config.getPerfectSamplingConfig().setPythonHistogramImage(outputHistogram);
+            config.getPerfectSamplingConfig().setPythonLastSequenceImage(outputSeqDiagram);
+            config.setTransientAnalysisConfig(new Config.TransientAnalysisConfig());
+            config.getTransientAnalysisConfig().setEnabled(true);
+            config.getTransientAnalysisConfig().setMaxDistanceToSteadyState(0.0001);
+            config.setDumbSamplingConfig(new Config.DumbSamplingConfig());
+            config.getDumbSamplingConfig().setEnabled(true);
+            config.getDumbSamplingConfig().setSigmas(new double[]{-2, -1, 0, 1, 2});
+
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -139,7 +168,7 @@ public class Main {
         }
     }
 
-    public static Output runExperiment(Config configuration, String outputFileName) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    public static Output runExperiment(Config configuration, String outputFileName) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, IOException {
 
         long seed;
         if (configuration.getSeed() != null) {
@@ -150,74 +179,89 @@ public class Main {
             configuration.setSeed(seed);
         }
 
-        int N = configuration.getN();
+        int N = configuration.getDtmcGeneratorConfig().getN();
 
         System.out.println("***** " + outputFileName + " *****");
         System.out.println("Seed: " + seed);
         RandomUtils.rand.setSeed(seed);
 
+        Output output = new Output();
+        output.setConfig(configuration);
+        output.setFileName(outputFileName);
+
         System.out.println("Generating matrix...");
         DTMCGenerator dtmcGenerator = new DTMCGenerator();
-        dtmcGenerator.setEdgesNumberDistribution(configuration.getEdgesNumberDistribution());
-        dtmcGenerator.setEdgesLocalityDistribution(configuration.getEdgesLocalityDistribution());
+        dtmcGenerator.setEdgesNumberDistribution(configuration.getDtmcGeneratorConfig().getEdgesNumberDistribution());
+        dtmcGenerator.setEdgesLocalityDistribution(configuration.getDtmcGeneratorConfig().getEdgesLocalityDistribution());
         dtmcGenerator.setN(N);
         Matrix P = dtmcGenerator.getMatrix();
+        output.setDtmcGeneratorOutput(new Output.DTMCGeneratorOutput());
+        output.getDtmcGeneratorOutput().setP(P);
 
         // Steady state distribution
 
         Map<Integer, Double> solutionSS = getSteadyStateDistributionOris(P);
         System.out.println(solutionSS);
 
-        Output output = new Output();
-        output.setConfig(configuration);
-        output.setFileName(outputFileName);
-        // Perfect Sampling
-
-        System.out.println("Running...");
-        PerfectSampler samplerCFTP = new PerfectSampler(P, configuration.getRandomHelperClass(), configuration.isPythonLastSequenceImage());
-        PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
-        StatisticalTest statTest = (StatisticalTest) configuration.getStatisticalTestConfig().getTestClass().getDeclaredConstructor().newInstance();
-        statTest.setConfidence(configuration.getStatisticalTestConfig().getConfidence());
-        statTest.setMaxError(configuration.getStatisticalTestConfig().getError());
-        perfectSampleRunner.run(statTest);
-        System.out.println("Runs: " + statTest.getSamplesSize() + "\t" + statTest.toString());
-        Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
-        System.out.println("\nPerfect sampling: ");
-        System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
-
-        try {
-            String dirName = FilenameUtils.removeExtension(outputFileName);
-            if (configuration.isPythonHistogramImage()) {
-                perfectSampleRunner.writeResultsOutput(dirName);
-            }
-            if (configuration.isPythonLastSequenceImage()) {
-                perfectSampleRunner.writeSequenceOutput(dirName);
-            }
-        } catch (IOException e) {
-            System.out.println("Cannot write Perfect sampling output file");
+        // Transient analysis
+        if (configuration.getTransientAnalysisConfig() != null && configuration.getTransientAnalysisConfig().isEnabled()) {
+            System.out.println("Transient analysis...");
+            Map<Integer, Matrix> transientResults = transientAnalysis(P, solutionSS, 0.0001);
+            String outputDirName = outputFileName.split("[.]")[0];
+            Files.createDirectories(Paths.get("postprocess/results/" + outputDirName));
+            writeFile(transientResults, "postprocess/results/" + outputDirName + "/transient.json");
         }
-        Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
-        psOutput.setStatisticalTest(statTest);
-        psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());
-        psOutput.setSigma(perfectSampleRunner.getStdDevSteps());
-        psOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piCFTP, N));
-        output.setPerfectSamplingOutput(psOutput);
 
-        //Dumb Sampling
-        DumbSampler dumbSampler = new DumbSampler(P);
-        for (int sigma = 0; sigma <= 2; sigma++) {
-            int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);
-            DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
-                    .steps(nSteps);
-            dumbSampleRunner.run(statTest.getSamplesSize());
-            Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
-            System.out.println("\nDumb sampling (" + sigma + " sigma): ");
-            System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
-            Output.DumbSamplingOutput dsOutput = new Output.DumbSamplingOutput();
-            dsOutput.setSteps(nSteps);
-            dsOutput.setSigmas(sigma);
-            dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
-            output.getDumbSamplingOutputs().add(dsOutput);
+        // Perfect Sampling
+        if (configuration.getPerfectSamplingConfig() != null && configuration.getPerfectSamplingConfig().isEnabled()) {
+            System.out.println("Running...");
+            Config.PerfectSamplingConfig psConfig = configuration.getPerfectSamplingConfig();
+            PerfectSampler samplerCFTP = new PerfectSampler(P, psConfig.getRandomHelperClass(), psConfig.isPythonLastSequenceImage());
+            PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
+            StatisticalTest statTest = psConfig.getStatisticalTestConfig().getTestClass().getDeclaredConstructor().newInstance();
+            statTest.setConfidence(psConfig.getStatisticalTestConfig().getConfidence());
+            statTest.setMaxError(psConfig.getStatisticalTestConfig().getError());
+            perfectSampleRunner.run(statTest);
+            System.out.println("Runs: " + statTest.getSamplesSize() + "\t" + statTest.toString());
+            Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
+            System.out.println("\nPerfect sampling: ");
+            System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+            try {
+                String dirName = FilenameUtils.removeExtension(outputFileName);
+                if (psConfig.isPythonHistogramImage()) {
+                    perfectSampleRunner.writeResultsOutput(dirName);
+                }
+                if (psConfig.isPythonLastSequenceImage()) {
+                    perfectSampleRunner.writeSequenceOutput(dirName);
+                }
+            } catch (IOException e) {
+                System.out.println("Cannot write Perfect sampling output file");
+            }
+            Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
+            psOutput.setStatisticalTest(statTest);
+            psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());
+            psOutput.setSigma(perfectSampleRunner.getStdDevSteps());
+            psOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+            output.setPerfectSamplingOutput(psOutput);
+
+            //Dumb Sampling
+            if (configuration.getDumbSamplingConfig() != null && configuration.getDumbSamplingConfig().isEnabled()) {
+                DumbSampler dumbSampler = new DumbSampler(P);
+                for (double sigma : configuration.getDumbSamplingConfig().getSigmas()) {
+                    int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);
+                    DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
+                            .steps(nSteps);
+                    dumbSampleRunner.run(statTest.getSamplesSize());
+                    Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
+                    System.out.println("\nDumb sampling (" + sigma + " sigma): ");
+                    System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
+                    Output.DumbSamplingOutput dsOutput = new Output.DumbSamplingOutput();
+                    dsOutput.setSteps(nSteps);
+                    dsOutput.setSigmas(sigma);
+                    dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
+                    output.getDumbSamplingOutputs().add(dsOutput);
+                }
+            }
         }
         System.out.println("\n\n");
         return output;

@@ -1,5 +1,6 @@
 package org.qesm.app.model;
 
+import org.la4j.Matrix;
 import org.qesm.app.model.test.StatisticalTest;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ public class Output {
     private Config config;
     private PerfectSamplingOutput perfectSamplingOutput;
     private List<DumbSamplingOutput> dumbSamplingOutputs = new ArrayList<>();
+    private DTMCGeneratorOutput dtmcGeneratorOutput;
 
     public void setConfig(Config config) {
         this.config = config;
@@ -33,6 +35,26 @@ public class Output {
 
     public PerfectSamplingOutput getPerfectSamplingOutput() {
         return perfectSamplingOutput;
+    }
+
+    public DTMCGeneratorOutput getDtmcGeneratorOutput() {
+        return dtmcGeneratorOutput;
+    }
+
+    public void setDtmcGeneratorOutput(DTMCGeneratorOutput dtmcGeneratorOutput) {
+        this.dtmcGeneratorOutput = dtmcGeneratorOutput;
+    }
+
+    public static class DTMCGeneratorOutput {
+        Matrix P;
+
+        public Matrix getP() {
+            return P;
+        }
+
+        public void setP(Matrix p) {
+            P = p;
+        }
     }
 
     public static class PerfectSamplingOutput {
@@ -83,11 +105,11 @@ public class Output {
     }
 
     public static class DumbSamplingOutput {
-        Integer sigmas;
+        Double sigmas;
         Integer steps;
         Double distance;
 
-        public void setSigmas(Integer sigmas) {
+        public void setSigmas(Double sigmas) {
             this.sigmas = sigmas;
         }
 
@@ -99,7 +121,7 @@ public class Output {
             this.distance = distance;
         }
 
-        public Integer getSigmas() {
+        public Double getSigmas() {
             return sigmas;
         }
 

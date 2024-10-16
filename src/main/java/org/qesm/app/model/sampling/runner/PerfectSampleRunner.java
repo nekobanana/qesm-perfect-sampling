@@ -83,7 +83,7 @@ public class PerfectSampleRunner implements SamplerRunner {
         return hist;
     }
 
-    public int getAvgStepsPlusStdDev(int sigmaCount) {
+    public int getAvgStepsPlusStdDev(double sigmaCount) {
         return (int) Math.round(getAvgSteps() + sigmaCount * getStdDevSteps());
     }
 

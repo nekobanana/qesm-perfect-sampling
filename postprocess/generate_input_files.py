@@ -34,39 +34,53 @@ def main():
 
     # Modello di configurazione
     config_template = {
-        "edgesNumberDistribution": {
-            "n": None,  # Questo sarà sostituito
-            "distributionType": "org.qesm.app.model.generator.distribution.SingleValueDistribution"
-        },
-        "edgesLocalityDistribution": {
-            "min": None,  # Questo sarà sostituito
-            "max": None,  # Questo sarà sostituito
-            "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
-        },
-        "selfLoopValue": None,
         "seed": None,
-        "statisticalTestConfig": {
-            "confidence": 0.95,
-            "error": 0.01,
-            "testClass": "org.qesm.app.model.test.ZTest"
-          },
-        "connectSCCs": False,
         "description": "single random value",
-        "pythonHistogramImage": True,
-        "pythonLastSequenceImage": False,
-        "n": None,  # Questo sarà sostituito
+        "dtmcGeneratorConfig": {
+            "n": None,  # Questo sarà sostituito
+            "connectSCCs": False,
+            "edgesNumberDistribution": {
+                "n": None,  # Questo sarà sostituito
+                "distributionType": "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+            },
+            "edgesLocalityDistribution": {
+                "min": None,  # Questo sarà sostituito
+                "max": None,  # Questo sarà sostituito
+                "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
+            },
+            "selfLoopValue": None,
+        },
+        "perfectSamplingConfig": {
+            "enabled" : True,
+            "statisticalTestConfig": {
+                "confidence": 0.95,
+                "error": 0.01,
+                "testClass": "org.qesm.app.model.test.ZTest"
+            },
+            "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
+            "pythonHistogramImage": True,
+            "pythonLastSequenceImage": False,
+        },
+        "dumbSamplingConfig": {
+            "enabled": False,
+            "sigmas": [-2.0, -1.0, 0.0, 1.0, 2.0]
+        },
+        "transientAnalysisConfig": {
+            "enabled": True,
+            "maxDistanceToSteadyState": 0.0001
+        },
     }
 
     # Generazione dei file
     for index, (N, n_edges, outgoing_edges_min, outgoing_edges_max) in enumerate(table):
         # Creazione della configurazione specifica
         config = config_template.copy()
-        config["edgesNumberDistribution"]["n"] = n_edges
-        config["edgesLocalityDistribution"]["min"] = outgoing_edges_min
-        config["edgesLocalityDistribution"]["max"] = outgoing_edges_max
-        config["n"] = N
+        config["dtmcGeneratorConfig"]["edgesNumberDistribution"]["n"] = n_edges
+        config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["min"] = outgoing_edges_min
+        config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["max"] = outgoing_edges_max
+        config["dtmcGeneratorConfig"]["n"] = N
         if index == 0:
-            config["pythonLastSequenceImage"] = True
+            config["perfectSamplingConfig"]["pythonLastSequenceImage"] = True
 
         # Nome del file
         filename = f"{index}.json"
