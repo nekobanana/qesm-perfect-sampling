@@ -1,0 +1,66 @@
+{
+  "fileName" : "0.json",
+  "config" : {
+    "seed" : -1316402460,
+    "description" : "single random value",
+    "dtmcGeneratorConfig" : {
+      "edgesNumberDistribution" : {
+        "n" : 2,
+        "distributionType" : "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+      },
+      "edgesLocalityDistribution" : {
+        "min" : -2,
+        "max" : 2,
+        "distributionType" : "org.qesm.app.model.generator.distribution.UniformDistribution"
+      },
+      "selfLoopValue" : null,
+      "connectSCCs" : false,
+      "n" : 4
+    },
+    "perfectSamplingConfig" : {
+      "statisticalTestConfig" : {
+        "confidence" : 0.95,
+        "error" : 0.01,
+        "testClass" : "org.qesm.app.model.test.ZTest"
+      },
+      "randomHelperClass" : "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
+      "pythonHistogramImage" : true,
+      "pythonLastSequenceImage" : false,
+      "enabled" : true
+    },
+    "dumbSamplingConfig" : {
+      "enabled" : false,
+      "sigmas" : [ -2.0, -1.0, 0.0, 1.0, 2.0 ]
+    },
+    "transientAnalysisConfig" : {
+      "enabled" : true,
+      "maxDistanceToSteadyState" : 1.0E-4
+    }
+  },
+  "steadyStateAnalysisOutput" : {
+    "steadyStateDistribution" : {
+      "0" : 0.15335615744497338,
+      "1" : 0.34316835300684556,
+      "2" : 0.14073668448926074,
+      "3" : 0.36273880505892026
+    }
+  },
+  "perfectSamplingOutput" : {
+    "avgSteps" : 8.581255,
+    "sigma" : 6.624865952254684,
+    "distance" : 0.0221092651789151,
+    "statisticalTest" : {
+      "name" : "ZTest",
+      "confidence" : 0.95,
+      "maxError" : 0.01,
+      "currentError" : 0.009999656346064329,
+      "samplesSize" : 22897,
+      "stdDev" : 6.624865921424323,
+      "mean" : 8.581255186268944
+    }
+  },
+  "dumbSamplingOutputs" : [ ],
+  "dtmcGeneratorOutput" : {
+    "p" : [ 0.0, 0.0, 0.3255093329737828, 0.6744906670262172, 0.0, 0.24438979917792714, 0.0, 0.7556102008220729, 0.0, 0.354696863141926, 0.6453031368580741, 0.0, 0.4227729575832492, 0.5772270424167508, 0.0, 0.0 ]
+  }
+}
