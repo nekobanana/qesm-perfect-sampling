@@ -1,8 +1,10 @@
 import json
 import os
+from collections import defaultdict
 from statistics import quantiles
 
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 
 
@@ -39,6 +41,7 @@ def main(transient_json, results_json, i):
     plt.ylabel('Transient analysis time')
     plt.savefig(f'results/{i}/transient.png')
     plt.close()
+    return coef
     derivative_y = np.diff(transient_quantiles_times) / np.diff(ps_quantiles)
     derivative_x = (ps_quantiles[:-1] + ps_quantiles[1:]) / 2
     # plt.plot(derivative_x, derivative_y)
@@ -51,9 +54,26 @@ def get_vector_from_json_map(json_map):
 
 
 if __name__ == '__main__':
-    for i in range(27):
+    java_results_dir = '../files/output'
+    results = defaultdict(lambda: [])
+    for output_file in os.listdir(java_results_dir):
+        i = output_file.split('.')[0]
         try:
-            main(f'results/{i}/transient.json', f'results/{i}/results.json', i)
+            coef = main(f'results/{i}/transient.json', f'results/{i}/results.json', i)
+            output_file_path = os.path.join(java_results_dir, output_file)
+            output_json = json.load(open(output_file_path))
+            results['file-name'].append(output_json['fileName'])
+            results['N'].append(output_json['config']['dtmcGeneratorConfig']['n'])
+            results['edges-number'].append(output_json['config']['dtmcGeneratorConfig']['edgesNumberDistribution']['n'])
+            loc_min = output_json['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['min']
+            loc_max = output_json['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['max']
+            results['locality-min'].append(loc_min)
+            results['locality-max'].append(loc_max)
+            results['linear-coeff-0'].append(coef[0])
+            results['linear-coeff-1'].append(coef[1])
+            df = pd.DataFrame.from_dict(results)
+            df = df.sort_values(by=['N', 'edges-number', 'locality-max'])
+            df.to_csv('../tables/transient_ps.csv', index=False)
 
         except Exception as err:
             print(Exception, err)
