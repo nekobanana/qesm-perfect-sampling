@@ -10,10 +10,10 @@ def generate_RQ1_table(java_results_dir, table1_path, table2_path):
         with open(os.path.join(java_results_dir, filename)) as f:
             data = json.load(f)
             name = data['fileName']
-            n = data['config']['n']
-            e_number = data['config']['edgesNumberDistribution']['n']
-            loc_min = data['config']['edgesLocalityDistribution']['min']
-            loc_max = data['config']['edgesLocalityDistribution']['max']
+            n = data['config']['dtmcGeneratorConfig']['n']
+            e_number = data['config']['dtmcGeneratorConfig']['edgesNumberDistribution']['n']
+            loc_min = data['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['min']
+            loc_max = data['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['max']
             e_locality = f'[{loc_min}\\comma {loc_max}]'
             e_locality_max = loc_max
             mean = f"{data['perfectSamplingOutput']['avgSteps']:.2f}"

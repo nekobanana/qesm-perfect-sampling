@@ -24,7 +24,7 @@
         },
         "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
         "pythonHistogramImage": true,
-        "pythonLastSequenceImage": true
+        "pythonLastSequenceImage": false
     },
     "dumbSamplingConfig": {
         "enabled": false,

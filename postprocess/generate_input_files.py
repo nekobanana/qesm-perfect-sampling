@@ -79,8 +79,6 @@ def main():
         config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["min"] = outgoing_edges_min
         config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["max"] = outgoing_edges_max
         config["dtmcGeneratorConfig"]["n"] = N
-        if index == 0:
-            config["perfectSamplingConfig"]["pythonLastSequenceImage"] = True
 
         # Nome del file
         filename = f"{index}.json"

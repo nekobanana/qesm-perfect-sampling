@@ -1,5 +1,5 @@
 {
-    "seed": -1128705754,
+    "seed": -1316402460,
     "description": "single random value",
     "dtmcGeneratorConfig": {
         "n": 4,
@@ -24,7 +24,7 @@
         },
         "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
         "pythonHistogramImage": true,
-        "pythonLastSequenceImage": true
+        "pythonLastSequenceImage": false
     },
     "dumbSamplingConfig": {
         "enabled": false,

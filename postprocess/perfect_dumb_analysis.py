@@ -14,10 +14,10 @@ def generate_RQ2_table(java_results_dir, table_path):
         output_file_path = os.path.join(java_results_dir, output_file)
         output_json = json.load(open(output_file_path))
         results['file-name'].append(output_json['fileName'])
-        results['N'].append(output_json['config']['n'])
-        results['edges-number'].append(output_json['config']['edgesNumberDistribution']['n'])
-        loc_min = output_json['config']['edgesLocalityDistribution']['min']
-        loc_max = output_json['config']['edgesLocalityDistribution']['max']
+        results['N'].append(output_json['config']['dtmcGeneratorConfig']['n'])
+        results['edges-number'].append(output_json['config']['dtmcGeneratorConfig']['edgesNumberDistribution']['n'])
+        loc_min = output_json['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['min']
+        loc_max = output_json['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['max']
         results['locality-min'].append(loc_min)
         results['locality-max'].append(loc_max)
         results['locality'].append(f'[{loc_min}\\comma {loc_max}]')
