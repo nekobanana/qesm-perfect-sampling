@@ -5,10 +5,12 @@ import org.qesm.app.model.test.StatisticalTest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Output {
     private String fileName;
     private Config config;
+    private SteadyStateAnalysisOutput steadyStateAnalysisOutput;
     private PerfectSamplingOutput perfectSamplingOutput;
     private List<DumbSamplingOutput> dumbSamplingOutputs = new ArrayList<>();
     private DTMCGeneratorOutput dtmcGeneratorOutput;
@@ -43,6 +45,14 @@ public class Output {
 
     public void setDtmcGeneratorOutput(DTMCGeneratorOutput dtmcGeneratorOutput) {
         this.dtmcGeneratorOutput = dtmcGeneratorOutput;
+    }
+
+    public SteadyStateAnalysisOutput getSteadyStateAnalysisOutput() {
+        return steadyStateAnalysisOutput;
+    }
+
+    public void setSteadyStateAnalysisOutput(SteadyStateAnalysisOutput steadyStateAnalysisOutput) {
+        this.steadyStateAnalysisOutput = steadyStateAnalysisOutput;
     }
 
     public static class DTMCGeneratorOutput {
@@ -131,6 +141,18 @@ public class Output {
 
         public Double getDistance() {
             return distance;
+        }
+    }
+
+    public static class SteadyStateAnalysisOutput {
+        Map<Integer, Double> steadyStateDistribution;
+
+        public Map<Integer, Double> getSteadyStateDistribution() {
+            return steadyStateDistribution;
+        }
+
+        public void setSteadyStateDistribution(Map<Integer, Double> steadyStateDistribution) {
+            this.steadyStateDistribution = steadyStateDistribution;
         }
     }
 }

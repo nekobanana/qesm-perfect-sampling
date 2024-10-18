@@ -66,7 +66,7 @@ public class Main {
         while (ssDist.subtract(pi_n).norm() > error) {
             t++;
             pi_n = pi_n.multiply(P);
-            results.put(t, pi_n);
+            results.put(t, pi_n.toDenseMatrix());
         }
         return results;
     }
@@ -202,14 +202,19 @@ public class Main {
 
         Map<Integer, Double> solutionSS = getSteadyStateDistributionOris(P);
         System.out.println(solutionSS);
+        output.setSteadyStateAnalysisOutput(new Output.SteadyStateAnalysisOutput());
+        output.getSteadyStateAnalysisOutput().setSteadyStateDistribution(solutionSS);
 
         // Transient analysis
         if (configuration.getTransientAnalysisConfig() != null && configuration.getTransientAnalysisConfig().isEnabled()) {
             System.out.println("Transient analysis...");
             Map<Integer, Matrix> transientResults = transientAnalysis(P, solutionSS, 0.0001);
+            Map<String, Object> transientJson = new HashMap<>();
+            transientJson.put("steadyStateDistribution", solutionSS);
+            transientJson.put("transientAnalysis", transientResults);
             String outputDirName = outputFileName.split("[.]")[0];
             Files.createDirectories(Paths.get("postprocess/results/" + outputDirName));
-            writeFile(transientResults, "postprocess/results/" + outputDirName + "/transient.json");
+            writeFile(transientJson, "postprocess/results/" + outputDirName + "/transient.json");
         }
 
         // Perfect Sampling
