@@ -63,7 +63,7 @@ public class Main {
         Map<Integer, Matrix> results = new HashMap<>();
         int t = 0;
         results.put(t, pi_n);
-        while (ssDist.subtract(pi_n).norm() > error) {
+        while (ssDist.subtract(pi_n).norm() > error * n) {
             t++;
             pi_n = pi_n.multiply(P);
             results.put(t, pi_n.toDenseMatrix());
@@ -85,11 +85,6 @@ public class Main {
         Option config = new Option("c", "config", true, "generated configuration file");
         config.setRequired(false);
         options.addOption(config);
-//
-//        Option postProcess = new Option("post", "post", false, "generate output for post process");
-//        postProcess.setRequired(false);
-//        postProcess.setType(Boolean.class);
-//        options.addOption(postProcess);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();

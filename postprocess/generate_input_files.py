@@ -51,7 +51,7 @@ def main():
             "selfLoopValue": None,
         },
         "perfectSamplingConfig": {
-            "enabled" : True,
+            "enabled" : False,
             "statisticalTestConfig": {
                 "confidence": 0.95,
                 "error": 0.01,

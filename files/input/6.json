@@ -1,5 +1,5 @@
 {
-    "seed": -459913962,
+    "seed": null,
     "description": "single random value",
     "dtmcGeneratorConfig": {
         "n": 16,
@@ -16,7 +16,7 @@
         "selfLoopValue": null
     },
     "perfectSamplingConfig": {
-        "enabled": true,
+        "enabled": false,
         "statisticalTestConfig": {
             "confidence": 0.95,
             "error": 0.01,

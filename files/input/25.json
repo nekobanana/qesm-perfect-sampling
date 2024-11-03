@@ -16,7 +16,7 @@
         "selfLoopValue": null
     },
     "perfectSamplingConfig": {
-        "enabled": true,
+        "enabled": false,
         "statisticalTestConfig": {
             "confidence": 0.95,
             "error": 0.01,
