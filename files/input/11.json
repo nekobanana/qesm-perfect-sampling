@@ -1,6 +1,6 @@
 {
-    "seed": null,
-    "description": "single random value",
+    "seed": 330814550,
+    "description": "single random value with forward coupling",
     "dtmcGeneratorConfig": {
         "n": 64,
         "connectSCCs": false,
@@ -16,7 +16,7 @@
         "selfLoopValue": null
     },
     "perfectSamplingConfig": {
-        "enabled": false,
+        "enabled": true,
         "statisticalTestConfig": {
             "confidence": 0.95,
             "error": 0.01,
@@ -37,7 +37,11 @@
         ]
     },
     "transientAnalysisConfig": {
-        "enabled": true,
+        "enabled": false,
         "maxDistanceToSteadyState": 0.0001
+    },
+    "forwardSamplingConfig": {
+        "enabled": true,
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper"
     }
 }

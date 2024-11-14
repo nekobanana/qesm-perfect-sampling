@@ -13,6 +13,7 @@ public class Output {
     private SteadyStateAnalysisOutput steadyStateAnalysisOutput;
     private PerfectSamplingOutput perfectSamplingOutput;
     private List<DumbSamplingOutput> dumbSamplingOutputs = new ArrayList<>();
+    private ForwardCouplingOutput forwardCouplingOutput;
     private DTMCGeneratorOutput dtmcGeneratorOutput;
 
     public void setConfig(Config config) {
@@ -29,6 +30,14 @@ public class Output {
 
     public void setDumbSamplingOutputs(List<DumbSamplingOutput> dumbSamplingOutputs) {
         this.dumbSamplingOutputs = dumbSamplingOutputs;
+    }
+
+    public ForwardCouplingOutput getForwardCouplingOutput() {
+        return forwardCouplingOutput;
+    }
+
+    public void setForwardCouplingOutput(ForwardCouplingOutput forwardCouplingOutput) {
+        this.forwardCouplingOutput = forwardCouplingOutput;
     }
 
     public Config getConfig() {
@@ -153,6 +162,27 @@ public class Output {
 
         public void setSteadyStateDistribution(Map<Integer, Double> steadyStateDistribution) {
             this.steadyStateDistribution = steadyStateDistribution;
+        }
+    }
+
+    public static class ForwardCouplingOutput {
+        Float avgSteps;
+        Double sigma;
+
+        public Float getAvgSteps() {
+            return avgSteps;
+        }
+
+        public void setAvgSteps(Float avgSteps) {
+            this.avgSteps = avgSteps;
+        }
+
+        public Double getSigma() {
+            return sigma;
+        }
+
+        public void setSigma(Double sigma) {
+            this.sigma = sigma;
         }
     }
 }

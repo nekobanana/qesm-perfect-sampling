@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class NRandomHelper extends RandomHelper {
 
-    public NRandomHelper(Random rand, Integer n) {
+    public NRandomHelper(Random rand, int n) {
         super(rand, n);
     }
 

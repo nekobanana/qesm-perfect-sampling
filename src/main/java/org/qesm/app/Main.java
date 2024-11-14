@@ -12,8 +12,10 @@ import org.qesm.app.model.generator.distribution.Distribution;
 import org.qesm.app.model.generator.distribution.SingleValueDistribution;
 import org.qesm.app.model.generator.distribution.UniformDistribution;
 import org.qesm.app.model.sampling.runner.DumbSampleRunner;
+import org.qesm.app.model.sampling.runner.ForwardCouplingRunner;
 import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
 import org.qesm.app.model.sampling.sampler.DumbSampler;
+import org.qesm.app.model.sampling.sampler.ForwardSampler;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
 import org.qesm.app.model.sampling.sampler.random.SingleRandomHelper;
 import org.qesm.app.model.test.StatisticalTest;
@@ -148,7 +150,9 @@ public class Main {
             config.setDumbSamplingConfig(new Config.DumbSamplingConfig());
             config.getDumbSamplingConfig().setEnabled(true);
             config.getDumbSamplingConfig().setSigmas(new double[]{-2, -1, 0, 1, 2});
-
+            config.setForwardSamplingConfig(new Config.ForwardSamplingConfig());
+            config.getForwardSamplingConfig().setEnabled(true);
+            config.getForwardSamplingConfig().setRandomHelperClass(randomHelperClass);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -226,8 +230,8 @@ public class Main {
             Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
             System.out.println("\nPerfect sampling: ");
             System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+            String dirName = FilenameUtils.removeExtension(outputFileName);
             try {
-                String dirName = FilenameUtils.removeExtension(outputFileName);
                 if (psConfig.isPythonHistogramImage()) {
                     perfectSampleRunner.writeResultsOutput(dirName);
                 }
@@ -261,6 +265,20 @@ public class Main {
                     dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
                     output.getDumbSamplingOutputs().add(dsOutput);
                 }
+            }
+
+            //Forward Sampling
+            if (configuration.getForwardSamplingConfig() != null && configuration.getForwardSamplingConfig().isEnabled()) {
+                ForwardSampler forwardSampler = new ForwardSampler(P, configuration.getForwardSamplingConfig().getRandomHelperClass());
+                ForwardCouplingRunner forwardCouplingRunner = (new ForwardCouplingRunner(forwardSampler));
+                forwardCouplingRunner.run(statTest.getSamplesSize());
+                System.out.println("\nForward coupling");
+                Output.ForwardCouplingOutput fcOutput = new Output.ForwardCouplingOutput();
+                fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());
+                fcOutput.setSigma(forwardCouplingRunner.getStdDevSteps());
+                output.setForwardCouplingOutput(fcOutput);
+                forwardCouplingRunner.writeResultsOutput(dirName);
+
             }
         }
         System.out.println("\n\n");

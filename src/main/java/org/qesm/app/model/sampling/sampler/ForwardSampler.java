@@ -16,7 +16,7 @@ public class ForwardSampler extends Sampler {
 
     public ForwardSampler(Matrix P, Class<? extends RandomHelper> randomHelperClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(P);
-        this.randomHelper = randomHelperClass.getConstructor(Random.class).newInstance(rand);
+        this.randomHelper = randomHelperClass.getConstructor(Random.class, int.class).newInstance(rand, n);
     }
 
     @Override

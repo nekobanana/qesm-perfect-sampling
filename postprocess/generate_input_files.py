@@ -35,7 +35,7 @@ def main():
     # Modello di configurazione
     config_template = {
         "seed": None,
-        "description": "single random value",
+        "description": "single random value with forward coupling",
         "dtmcGeneratorConfig": {
             "n": None,  # Questo sarà sostituito
             "connectSCCs": False,
@@ -51,7 +51,7 @@ def main():
             "selfLoopValue": None,
         },
         "perfectSamplingConfig": {
-            "enabled" : False,
+            "enabled" : True,
             "statisticalTestConfig": {
                 "confidence": 0.95,
                 "error": 0.01,
@@ -66,9 +66,13 @@ def main():
             "sigmas": [-2.0, -1.0, 0.0, 1.0, 2.0]
         },
         "transientAnalysisConfig": {
-            "enabled": True,
+            "enabled": False,
             "maxDistanceToSteadyState": 0.0001
         },
+        "forwardSamplingConfig": {
+            "enabled": True,
+            "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper"
+        }
     }
 
     # Generazione dei file

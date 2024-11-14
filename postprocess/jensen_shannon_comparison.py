@@ -1,5 +1,7 @@
+import itertools
 import json
 import os
+import traceback
 from pathlib import Path
 
 import numpy as np
@@ -29,37 +31,55 @@ def extend_histogram(observed_freq, bin_edges, min_value, max_value):
     return new_observed_freq, new_bin_edges
 
 
-def main(results_json_1, results_json_2, name1, name2):
-    experiment_name = os.path.basename(os.path.dirname(results_json_1))
-    assert experiment_name == os.path.basename(os.path.dirname(results_json_2))
-    histogram1, steps1 = get_histogram(results_json_1)
-    histogram2, steps2 = get_histogram(results_json_2)
-    min_value = min(histogram1[1][0], histogram2[1][0])
-    max_value = max(histogram1[1][-1], histogram2[1][-1])
-    histogram1 = extend_histogram(histogram1[0], histogram1[1], min_value, max_value)
-    histogram2 = extend_histogram(histogram2[0], histogram2[1], min_value, max_value)
-    dist1 = histogram1[0] / np.linalg.norm(histogram1)
-    dist2 = histogram2[0] / np.linalg.norm(histogram2)
-    div_js = distance.jensenshannon(dist1, dist2)
-    print(f'Jensen-Shannon divergence: {div_js}')
-    plot_dists([steps1, steps2], [name1, name2], f'jensen_shannon/freq/{experiment_name}', False)
-    plot_dists([steps1, steps2], [name1, name2], f'jensen_shannon/pdf/{experiment_name}', True)
-    plot_CDFs([steps1, steps2], [name1, name2], f'jensen_shannon/cdf/{experiment_name}')
+def main(results, names):
+    experiment_name = os.path.basename(os.path.dirname(results[0]))
+    # assert experiment_name == os.path.basename(os.path.dirname(results_json_2))
+    histograms, steps = [], []
+    for result, name in zip(results, names):
+        histogram, s = get_histogram(result)
+        histograms.append(histogram)
+        steps.append(s)
+    min_value = min(*[h[1][0] for h in histograms])
+    max_value = max(*[h[1][-1] for h in histograms])
+    # min_value = min(histogram1[1][0], histogram2[1][0])
+    # max_value = max(histogram1[1][-1], histogram2[1][-1])
+    for i in range(len(histograms)):
+        histograms[i] = extend_histogram(histograms[i][0], histograms[i][1], min_value, max_value)
+    # histogram1 = extend_histogram(histogram1[0], histogram1[1], min_value, max_value)
+    # histogram2 = extend_histogram(histogram2[0], histogram2[1], min_value, max_value)
+    distances = []
+    for hist in histograms:
+        distances.append(hist[0] / np.linalg.norm(hist))
+    # dist1 = histogram1[0] / np.linalg.norm(histogram1)
+    plot_dists(steps, names, f'{base_dir}/freq/{experiment_name}', False)
+    plot_dists(steps, names, f'{base_dir}/pdf/{experiment_name}', True)
+    plot_CDFs(steps, names, f'{base_dir}/cdf/{experiment_name}')
+
+    summary_pairs = []
+
+    for (path1, name1, dist1), (path2, name2, dist2) in itertools.combinations(zip(results, names, distances), 2):
+        div_js = distance.jensenshannon(dist1, dist2)
+        print(f'Jensen-Shannon divergence: {div_js}')
+        summary_pairs.append({
+            'distributions': [
+                {
+                    'path': path1,
+                    'description': name1
+                },
+                {
+                    'path': path2,
+                    'description': name2
+                }
+            ],
+            'jensen-shannon-divergence': div_js
+        })
     summary = {
-        'distributions': [
-            {
-                'path': results_json_1,
-                'description': name1
-            },
-            {
-                'path': results_json_2,
-                'description': name2
-            }
-        ],
-        'jensen-shannon-divergence': div_js,
-        'graph': experiment_name
+        'graph': experiment_name,
+        'comparisons': []
     }
-    with open(f'jensen_shannon/0.1_error_same_DTMC/divergence/{experiment_name}.json', 'w') as fp:
+    for pair in summary_pairs:
+        summary['comparisons'].append(pair)
+    with open(f'{base_dir}/divergence/{experiment_name}.json', 'w') as fp:
         json.dump(summary, fp, indent=4)
 
 def plot_dists(steps_dists, names, image_name, normalized=False):
@@ -87,16 +107,21 @@ def plot_CDFs(steps_dists, names, image_name):
 
 
 if __name__ == '__main__':
-    Path(f'jensen_shannon/freq', exist_ok=True)
-    Path(f'jensen_shannon/0.1_error_same_DTMC/pdf', exist_ok=True)
-    Path(f'jensen_shannon/0.1_error_same_DTMC/cdf', exist_ok=True)
-    Path(f'jensen_shannon/0.1_error_same_DTMC/divergence', exist_ok=True)
-    for n in range(1, 28):
+    base_dir = 'jensen_shannon/test'
+    # base_dir = 'jensen_shannon/0.1_error_same_DTMC'
+    Path(base_dir, 'freq').mkdir(exist_ok=True)
+    Path(base_dir, 'pdf').mkdir(exist_ok=True)
+    Path(base_dir, 'cdf').mkdir(exist_ok=True)
+    Path(base_dir, 'divergence').mkdir(exist_ok=True)
+    for n in range(0, 1):
         try:
-            results_json_1 = f'../results_history/same_DTMC/20241001-225331-single-random-0.01/results/{n}/results.json'
-            results_json_2 = f'../results_history/same_DTMC/20241001-004925-N-random-0.01/results/{n}/results.json'
+            # results_json_1 = f'../results_history/same_DTMC/20241001-225331-single-random-0.01/results/{n}/results.json'
+            # results_json_2 = f'../results_history/same_DTMC/20241001-004925-N-random-0.01/results/{n}/results.json'
+            results_json_1 = f'results/{n}/results.json'
+            results_json_3 = f'results/{n}/results_forward.json'
             desc1 = f'1 random'
             desc2 = f'N random'
-            main(results_json_1, results_json_2, desc1, desc2)
+            desc3 = f'1 random forward'
+            main([results_json_1, results_json_3], [desc1, desc3])
         except Exception as e:
-            pass
+            print(traceback.format_exc())

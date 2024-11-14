@@ -22,7 +22,7 @@ public class PerfectSampler extends Sampler {
     public PerfectSampler(Matrix P, Class<? extends RandomHelper> randomHelperClass, boolean keepSequence) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(P);
         this.keepSequence = keepSequence;
-        this.randomHelper = randomHelperClass.getConstructor(Random.class, Integer.class).newInstance(rand, n);
+        this.randomHelper = randomHelperClass.getConstructor(Random.class, int.class).newInstance(rand, n);
     }
 
     public PerfectSampler(Matrix P, Class<? extends RandomHelper> randomHelperClass) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {

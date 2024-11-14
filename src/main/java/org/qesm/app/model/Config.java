@@ -13,6 +13,7 @@ public class Config {
     private String description;
     private DTMCGeneratorConfig dtmcGeneratorConfig;
     private PerfectSamplingConfig perfectSamplingConfig;
+    private ForwardSamplingConfig forwardSamplingConfig;
     private DumbSamplingConfig dumbSamplingConfig;
     private TransientAnalysisConfig transientAnalysisConfig;
 
@@ -64,6 +65,14 @@ public class Config {
 
     public void setPerfectSamplingConfig(PerfectSamplingConfig perfectSamplingConfig) {
         this.perfectSamplingConfig = perfectSamplingConfig;
+    }
+
+    public ForwardSamplingConfig getForwardSamplingConfig() {
+        return forwardSamplingConfig;
+    }
+
+    public void setForwardSamplingConfig(ForwardSamplingConfig forwardSamplingConfig) {
+        this.forwardSamplingConfig = forwardSamplingConfig;
     }
 
     public static class DTMCGeneratorConfig {
@@ -230,6 +239,27 @@ public class Config {
 
         public void setMaxDistanceToSteadyState(double maxDistanceToSteadyState) {
             this.maxDistanceToSteadyState = maxDistanceToSteadyState;
+        }
+    }
+
+    public static class ForwardSamplingConfig {
+        private boolean enabled;
+        private Class<? extends RandomHelper> randomHelperClass;
+
+        public Class<? extends RandomHelper> getRandomHelperClass() {
+            return randomHelperClass;
+        }
+
+        public void setRandomHelperClass(Class<? extends RandomHelper> randomHelperClass) {
+            this.randomHelperClass = randomHelperClass;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
     }
 }
