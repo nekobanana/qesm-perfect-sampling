@@ -1,0 +1,157 @@
+{
+  "fileName" : "17.json",
+  "config" : {
+    "seed" : 123432139,
+    "description" : "single random value with forward coupling",
+    "dtmcGeneratorConfig" : {
+      "edgesNumberDistribution" : {
+        "n" : 12,
+        "distributionType" : "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+      },
+      "edgesLocalityDistribution" : {
+        "min" : -6,
+        "max" : 6,
+        "distributionType" : "org.qesm.app.model.generator.distribution.UniformDistribution"
+      },
+      "selfLoopValue" : null,
+      "connectSCCs" : false,
+      "n" : 64
+    },
+    "perfectSamplingConfig" : {
+      "statisticalTestConfig" : {
+        "confidence" : 0.95,
+        "error" : 0.01,
+        "testClass" : "org.qesm.app.model.test.ZTest"
+      },
+      "randomHelperClass" : "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper",
+      "pythonHistogramImage" : true,
+      "pythonLastSequenceImage" : false,
+      "enabled" : true
+    },
+    "forwardSamplingConfig" : {
+      "enabled" : true,
+      "randomHelperClass" : "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper"
+    },
+    "dumbSamplingConfig" : {
+      "enabled" : true,
+      "sigmas" : [ -2.0, -1.0, 0.0, 1.0, 2.0 ]
+    },
+    "transientAnalysisConfig" : {
+      "enabled" : true,
+      "maxDistanceToSteadyState" : 1.0E-4
+    }
+  },
+  "steadyStateAnalysisOutput" : {
+    "steadyStateDistribution" : {
+      "0" : 0.019123192290959892,
+      "1" : 0.027812030306440534,
+      "2" : 0.020529263113158093,
+      "3" : 0.02228541288461195,
+      "4" : 0.01993481669084954,
+      "5" : 0.027796747961816606,
+      "6" : 0.02107429891803888,
+      "7" : 0.015121151370224328,
+      "8" : 0.01995467441510894,
+      "9" : 0.024931539785641135,
+      "10" : 0.023306309745716344,
+      "11" : 0.024994938021862943,
+      "12" : 0.015511448393471105,
+      "13" : 0.021083218580586073,
+      "14" : 0.02122598424174801,
+      "15" : 0.019258602843717585,
+      "16" : 0.018965907639829863,
+      "17" : 0.016527594274934294,
+      "18" : 0.016835980012234606,
+      "19" : 0.011568085552259506,
+      "20" : 0.012980631743709623,
+      "21" : 0.012225559051278423,
+      "22" : 0.013838951509966654,
+      "23" : 0.01145041394767789,
+      "24" : 0.011364904926941847,
+      "25" : 0.009767821975295254,
+      "26" : 0.010977713054908498,
+      "27" : 0.01025617386555148,
+      "28" : 0.011590949107777073,
+      "29" : 0.008780831331123484,
+      "30" : 0.012168805664781655,
+      "31" : 0.008435710878018476,
+      "32" : 0.007461532180769192,
+      "33" : 0.008460498046528627,
+      "34" : 0.00717600826817646,
+      "35" : 0.006284269735437748,
+      "36" : 0.008721433498955964,
+      "37" : 0.008345044802780853,
+      "38" : 0.007834986291330082,
+      "39" : 0.008376976894256212,
+      "40" : 0.005713034605798177,
+      "41" : 0.011603481643063419,
+      "42" : 0.010607704269160514,
+      "43" : 0.011085886966101677,
+      "44" : 0.013809111459555481,
+      "45" : 0.010219776760020158,
+      "46" : 0.01159160614568135,
+      "47" : 0.018505736230533608,
+      "48" : 0.012169903863839265,
+      "49" : 0.016998638732889197,
+      "50" : 0.01194179878816529,
+      "51" : 0.0173566277574123,
+      "52" : 0.021388294744067636,
+      "53" : 0.02091145527858448,
+      "54" : 0.01832009241123441,
+      "55" : 0.021985401130211805,
+      "56" : 0.017395644238241564,
+      "57" : 0.00869371630964492,
+      "58" : 0.023372881451701768,
+      "59" : 0.02405285149291728,
+      "60" : 0.017881258316536225,
+      "61" : 0.025861787324591393,
+      "62" : 0.027337454622068217,
+      "63" : 0.016855441639504226
+    }
+  },
+  "perfectSamplingOutput" : {
+    "avgSteps" : 89.80613,
+    "sigma" : 49.862062442477665,
+    "distance" : 1.1797532879309618E-4,
+    "statisticalTest" : {
+      "name" : "ZTest",
+      "confidence" : 0.95,
+      "maxError" : 0.01,
+      "currentError" : 0.009999573479140326,
+      "samplesSize" : 11843,
+      "stdDev" : 49.862061778221104,
+      "mean" : 89.80613020349574
+    }
+  },
+  "dumbSamplingOutputs" : [ {
+    "sigmas" : -2.0,
+    "steps" : -10,
+    "distance" : 7.533984786867913E-4
+  }, {
+    "sigmas" : -1.0,
+    "steps" : 40,
+    "distance" : 1.5206696466578333E-4
+  }, {
+    "sigmas" : 0.0,
+    "steps" : 90,
+    "distance" : 1.5570716943491184E-4
+  }, {
+    "sigmas" : 1.0,
+    "steps" : 140,
+    "distance" : 1.5630936011318874E-4
+  }, {
+    "sigmas" : 2.0,
+    "steps" : 190,
+    "distance" : 1.360400714832497E-4
+  } ],
+  "forwardCouplingOutput" : {
+    "avgSteps" : 91.904335,
+    "sigma" : 51.04402785838358
+  },
+  "dtmcGeneratorOutput" : {
+    "p" : {
+      "rowMajor" : false,
+      "columnMajor" : true
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "fileName" : "0.json",
+  "config" : {
+    "seed" : -1316402460,
+    "description" : "single random value with forward coupling",
+    "dtmcGeneratorConfig" : {
+      "edgesNumberDistribution" : {
+        "n" : 2,
+        "distributionType" : "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+      },
+      "edgesLocalityDistribution" : {
+        "min" : -2,
+        "max" : 2,
+        "distributionType" : "org.qesm.app.model.generator.distribution.UniformDistribution"
+      },
+      "selfLoopValue" : null,
+      "connectSCCs" : false,
+      "n" : 4
+    },
+    "perfectSamplingConfig" : {
+      "statisticalTestConfig" : {
+        "confidence" : 0.95,
+        "error" : 0.01,
+        "testClass" : "org.qesm.app.model.test.ZTest"
+      },
+      "randomHelperClass" : "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper",
+      "pythonHistogramImage" : true,
+      "pythonLastSequenceImage" : false,
+      "enabled" : true
+    },
+    "forwardSamplingConfig" : {
+      "enabled" : true,
+      "randomHelperClass" : "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper"
+    },
+    "dumbSamplingConfig" : {
+      "enabled" : true,
+      "sigmas" : [ -2.0, -1.0, 0.0, 1.0, 2.0 ]
+    },
+    "transientAnalysisConfig" : {
+      "enabled" : true,
+      "maxDistanceToSteadyState" : 1.0E-4
+    }
+  },
+  "steadyStateAnalysisOutput" : {
+    "steadyStateDistribution" : {
+      "0" : 0.15335615744497338,
+      "1" : 0.34316835300684556,
+      "2" : 0.14073668448926074,
+      "3" : 0.36273880505892026
+    }
+  },
+  "perfectSamplingOutput" : {
+    "avgSteps" : 8.08251,
+    "sigma" : 6.250965824171069,
+    "distance" : 0.012435590689999172,
+    "statisticalTest" : {
+      "name" : "ZTest",
+      "confidence" : 0.95,
+      "maxError" : 0.01,
+      "currentError" : 0.009999617716903973,
+      "samplesSize" : 22979,
+      "stdDev" : 6.250965843437341,
+      "mean" : 8.082510117933765
+    }
+  },
+  "dumbSamplingOutputs" : [ {
+    "sigmas" : -2.0,
+    "steps" : -4,
+    "distance" : 0.05163603061104052
+  }, {
+    "sigmas" : -1.0,
+    "steps" : 2,
+    "distance" : 0.022541028954456352
+  }, {
+    "sigmas" : 0.0,
+    "steps" : 8,
+    "distance" : 0.004406459888017287
+  }, {
+    "sigmas" : 1.0,
+    "steps" : 14,
+    "distance" : 0.0012273114850678507
+  }, {
+    "sigmas" : 2.0,
+    "steps" : 21,
+    "distance" : 0.0020086621170979898
+  } ],
+  "forwardCouplingOutput" : {
+    "avgSteps" : 9.003742,
+    "sigma" : 6.17747388987298
+  },
+  "dtmcGeneratorOutput" : {
+    "p" : [ 0.0, 0.0, 0.3255093329737828, 0.6744906670262172, 0.0, 0.24438979917792714, 0.0, 0.7556102008220729, 0.0, 0.354696863141926, 0.6453031368580741, 0.0, 0.4227729575832492, 0.5772270424167508, 0.0, 0.0 ]
+  }
+}

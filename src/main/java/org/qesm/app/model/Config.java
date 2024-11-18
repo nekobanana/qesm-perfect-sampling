@@ -4,9 +4,6 @@ import org.qesm.app.model.generator.distribution.Distribution;
 import org.qesm.app.model.sampling.sampler.random.RandomHelper;
 import org.qesm.app.model.test.StatisticalTest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Config {
 
     private Long seed;
@@ -15,7 +12,9 @@ public class Config {
     private PerfectSamplingConfig perfectSamplingConfig;
     private ForwardSamplingConfig forwardSamplingConfig;
     private DumbSamplingConfig dumbSamplingConfig;
+    private ForwardCouplingConfig forwardCouplingConfig;
     private TransientAnalysisConfig transientAnalysisConfig;
+    private Output.PerfectSamplingOutput previousPerfectSamplingOutput;
 
 
     public Long getSeed() {
@@ -33,6 +32,22 @@ public class Config {
     public void setDescription(String description) {
         this.description = description;
 
+    }
+
+    public Output.PerfectSamplingOutput getPreviousPerfectSamplingOutput() {
+        return previousPerfectSamplingOutput;
+    }
+
+    public void setPreviousPerfectSamplingOutput(Output.PerfectSamplingOutput previousPerfectSamplingOutput) {
+        this.previousPerfectSamplingOutput = previousPerfectSamplingOutput;
+    }
+
+    public ForwardCouplingConfig getForwardCouplingConfig() {
+        return forwardCouplingConfig;
+    }
+
+    public void setForwardCouplingConfig(ForwardCouplingConfig forwardCouplingConfig) {
+        this.forwardCouplingConfig = forwardCouplingConfig;
     }
 
     public DumbSamplingConfig getDumbSamplingConfig() {
@@ -253,6 +268,18 @@ public class Config {
         public void setRandomHelperClass(Class<? extends RandomHelper> randomHelperClass) {
             this.randomHelperClass = randomHelperClass;
         }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+    }
+
+    public static class ForwardCouplingConfig {
+        private boolean enabled;
 
         public boolean isEnabled() {
             return enabled;

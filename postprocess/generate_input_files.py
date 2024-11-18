@@ -35,7 +35,7 @@ def main():
     # Modello di configurazione
     config_template = {
         "seed": None,
-        "description": "single random value with forward coupling",
+        "description": "True forward coupling with run number equal to PS run number with single random",
         "dtmcGeneratorConfig": {
             "n": None,  # Questo sarà sostituito
             "connectSCCs": False,
@@ -51,7 +51,7 @@ def main():
             "selfLoopValue": None,
         },
         "perfectSamplingConfig": {
-            "enabled" : True,
+            "enabled" : False,
             "statisticalTestConfig": {
                 "confidence": 0.95,
                 "error": 0.01,
@@ -70,8 +70,11 @@ def main():
             "maxDistanceToSteadyState": 0.0001
         },
         "forwardSamplingConfig": {
+            "enabled": False,
+            "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper"
+        },
+        "forwardCouplingConfig": {
             "enabled": True,
-            "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.SingleRandomHelper"
         }
     }
 

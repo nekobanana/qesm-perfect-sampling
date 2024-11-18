@@ -13,8 +13,10 @@ import org.qesm.app.model.generator.distribution.SingleValueDistribution;
 import org.qesm.app.model.generator.distribution.UniformDistribution;
 import org.qesm.app.model.sampling.runner.DumbSampleRunner;
 import org.qesm.app.model.sampling.runner.ForwardCouplingRunner;
+import org.qesm.app.model.sampling.runner.ForwardSampleRunner;
 import org.qesm.app.model.sampling.runner.PerfectSampleRunner;
 import org.qesm.app.model.sampling.sampler.DumbSampler;
+import org.qesm.app.model.sampling.sampler.ForwardCoupler;
 import org.qesm.app.model.sampling.sampler.ForwardSampler;
 import org.qesm.app.model.sampling.sampler.PerfectSampler;
 import org.qesm.app.model.sampling.sampler.random.SingleRandomHelper;
@@ -153,6 +155,8 @@ public class Main {
             config.setForwardSamplingConfig(new Config.ForwardSamplingConfig());
             config.getForwardSamplingConfig().setEnabled(true);
             config.getForwardSamplingConfig().setRandomHelperClass(randomHelperClass);
+            config.setForwardCouplingConfig(new Config.ForwardCouplingConfig());
+            config.getForwardCouplingConfig().setEnabled(true);
             writeFile(config, configOutputFile);
         }
         else { // load config file and start experiment
@@ -215,7 +219,8 @@ public class Main {
             Files.createDirectories(Paths.get("postprocess/results/" + outputDirName));
             writeFile(transientJson, "postprocess/results/" + outputDirName + "/transient.json");
         }
-
+        String dirName = FilenameUtils.removeExtension(outputFileName);
+        Output.PerfectSamplingOutput psOutput = null;
         // Perfect Sampling
         if (configuration.getPerfectSamplingConfig() != null && configuration.getPerfectSamplingConfig().isEnabled()) {
             System.out.println("Running...");
@@ -230,7 +235,6 @@ public class Main {
             Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
             System.out.println("\nPerfect sampling: ");
             System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
-            String dirName = FilenameUtils.removeExtension(outputFileName);
             try {
                 if (psConfig.isPythonHistogramImage()) {
                     perfectSampleRunner.writeResultsOutput(dirName);
@@ -241,46 +245,65 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("Cannot write Perfect sampling output file");
             }
-            Output.PerfectSamplingOutput psOutput = new Output.PerfectSamplingOutput();
+            psOutput = new Output.PerfectSamplingOutput();
             psOutput.setStatisticalTest(statTest);
             psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());
             psOutput.setSigma(perfectSampleRunner.getStdDevSteps());
             psOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piCFTP, N));
             output.setPerfectSamplingOutput(psOutput);
+        }
 
-            //Dumb Sampling
-            if (configuration.getDumbSamplingConfig() != null && configuration.getDumbSamplingConfig().isEnabled()) {
-                DumbSampler dumbSampler = new DumbSampler(P);
-                for (double sigma : configuration.getDumbSamplingConfig().getSigmas()) {
-                    int nSteps = perfectSampleRunner.getAvgStepsPlusStdDev(sigma);
-                    DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
-                            .steps(nSteps);
-                    dumbSampleRunner.run(statTest.getSamplesSize());
-                    Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
-                    System.out.println("\nDumb sampling (" + sigma + " sigma): ");
-                    System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
-                    Output.DumbSamplingOutput dsOutput = new Output.DumbSamplingOutput();
-                    dsOutput.setSteps(nSteps);
-                    dsOutput.setSigmas(sigma);
-                    dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
-                    output.getDumbSamplingOutputs().add(dsOutput);
-                }
-            }
-
-            //Forward Sampling
-            if (configuration.getForwardSamplingConfig() != null && configuration.getForwardSamplingConfig().isEnabled()) {
-                ForwardSampler forwardSampler = new ForwardSampler(P, configuration.getForwardSamplingConfig().getRandomHelperClass());
-                ForwardCouplingRunner forwardCouplingRunner = (new ForwardCouplingRunner(forwardSampler));
-                forwardCouplingRunner.run(statTest.getSamplesSize());
-                System.out.println("\nForward coupling");
-                Output.ForwardCouplingOutput fcOutput = new Output.ForwardCouplingOutput();
-                fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());
-                fcOutput.setSigma(forwardCouplingRunner.getStdDevSteps());
-                output.setForwardCouplingOutput(fcOutput);
-                forwardCouplingRunner.writeResultsOutput(dirName);
-
+        if (psOutput == null) {
+            psOutput = configuration.getPreviousPerfectSamplingOutput();
+        }
+        //Dumb Sampling
+        if (configuration.getDumbSamplingConfig() != null && configuration.getDumbSamplingConfig().isEnabled()
+        && psOutput != null) {
+            DumbSampler dumbSampler = new DumbSampler(P);
+            for (double sigma : configuration.getDumbSamplingConfig().getSigmas()) {
+                int nSteps = getAvgStepsPlusStdDev(psOutput.getAvgSteps(), psOutput.getSigma(), sigma);
+                DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
+                        .steps(nSteps);
+                dumbSampleRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+                Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
+                System.out.println("\nDumb sampling (" + sigma + " sigma): ");
+                System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
+                Output.DumbSamplingOutput dsOutput = new Output.DumbSamplingOutput();
+                dsOutput.setSteps(nSteps);
+                dsOutput.setSigmas(sigma);
+                dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
+                output.getDumbSamplingOutputs().add(dsOutput);
             }
         }
+
+        //Forward Sampling
+        if (configuration.getForwardSamplingConfig() != null && configuration.getForwardSamplingConfig().isEnabled()
+        && psOutput != null) {
+            ForwardSampler forwardSampler = new ForwardSampler(P, configuration.getForwardSamplingConfig().getRandomHelperClass());
+            ForwardSampleRunner forwardCouplingRunner = (new ForwardSampleRunner(forwardSampler));
+            forwardCouplingRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+            System.out.println("\nForward sampling");
+            Output.ForwardSamplingOutput fcOutput = new Output.ForwardSamplingOutput();
+            fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());
+            fcOutput.setSigma(forwardCouplingRunner.getStdDevSteps());
+            output.setForwardSamplingOutput(fcOutput);
+            forwardCouplingRunner.writeResultsOutput(dirName);
+        }
+
+        //Forward Coupling
+        if (configuration.getForwardCouplingConfig() != null && configuration.getForwardCouplingConfig().isEnabled()
+                && psOutput != null) {
+            ForwardCoupler forwardCoupler = new ForwardCoupler(P);
+            ForwardCouplingRunner forwardCouplingRunner = (new ForwardCouplingRunner(forwardCoupler));
+            forwardCouplingRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+            System.out.println("\nForward coupling");
+            Output.ForwardCouplingOutput fcOutput = new Output.ForwardCouplingOutput();
+            fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());
+            fcOutput.setSigma(forwardCouplingRunner.getStdDevSteps());
+            output.setForwardCouplingOutput(fcOutput);
+            forwardCouplingRunner.writeResultsOutput(dirName);
+        }
+
         System.out.println("\n\n");
         return output;
     }
@@ -289,5 +312,9 @@ public class Main {
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
         writer.write(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(object));
         writer.close();
+    }
+
+    public static int getAvgStepsPlusStdDev(double avg, double stdDev, double sigmaCount) {
+        return (int) Math.round(avg + sigmaCount * stdDev);
     }
 }

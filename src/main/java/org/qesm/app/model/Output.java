@@ -13,6 +13,7 @@ public class Output {
     private SteadyStateAnalysisOutput steadyStateAnalysisOutput;
     private PerfectSamplingOutput perfectSamplingOutput;
     private List<DumbSamplingOutput> dumbSamplingOutputs = new ArrayList<>();
+    private ForwardSamplingOutput forwardSamplingOutput;
     private ForwardCouplingOutput forwardCouplingOutput;
     private DTMCGeneratorOutput dtmcGeneratorOutput;
 
@@ -32,12 +33,12 @@ public class Output {
         this.dumbSamplingOutputs = dumbSamplingOutputs;
     }
 
-    public ForwardCouplingOutput getForwardCouplingOutput() {
-        return forwardCouplingOutput;
+    public ForwardSamplingOutput getForwardSamplingOutput() {
+        return forwardSamplingOutput;
     }
 
-    public void setForwardCouplingOutput(ForwardCouplingOutput forwardCouplingOutput) {
-        this.forwardCouplingOutput = forwardCouplingOutput;
+    public void setForwardSamplingOutput(ForwardSamplingOutput forwardSamplingOutput) {
+        this.forwardSamplingOutput = forwardSamplingOutput;
     }
 
     public Config getConfig() {
@@ -62,6 +63,14 @@ public class Output {
 
     public void setSteadyStateAnalysisOutput(SteadyStateAnalysisOutput steadyStateAnalysisOutput) {
         this.steadyStateAnalysisOutput = steadyStateAnalysisOutput;
+    }
+
+    public ForwardCouplingOutput getForwardCouplingOutput() {
+        return forwardCouplingOutput;
+    }
+
+    public void setForwardCouplingOutput(ForwardCouplingOutput forwardCouplingOutput) {
+        this.forwardCouplingOutput = forwardCouplingOutput;
     }
 
     public static class DTMCGeneratorOutput {
@@ -165,6 +174,27 @@ public class Output {
         }
     }
 
+    public static class ForwardSamplingOutput {
+        Float avgSteps;
+        Double sigma;
+
+        public Float getAvgSteps() {
+            return avgSteps;
+        }
+
+        public void setAvgSteps(Float avgSteps) {
+            this.avgSteps = avgSteps;
+        }
+
+        public Double getSigma() {
+            return sigma;
+        }
+
+        public void setSigma(Double sigma) {
+            this.sigma = sigma;
+        }
+    }
+
     public static class ForwardCouplingOutput {
         Float avgSteps;
         Double sigma;
@@ -185,4 +215,6 @@ public class Output {
             this.sigma = sigma;
         }
     }
+
+
 }

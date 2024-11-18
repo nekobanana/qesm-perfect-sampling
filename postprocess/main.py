@@ -43,13 +43,13 @@ def main(argument_list):
             if current_argument in ("-h", "--histogram"):
                 print('Generating histogram...')
                 try:
-                    histogram(current_value)
+                    histogram(current_value.strip())
                 except Exception as e:
                     print(e)
             elif current_argument in ("-s", "--sequence"):
                 print('Generating sequence image...')
                 try:
-                    sequence_diagram(current_value)
+                    sequence_diagram(current_value.strip())
                 except Exception as e:
                     print(e)
     except getopt.error as err:

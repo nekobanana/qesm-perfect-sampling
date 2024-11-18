@@ -107,21 +107,27 @@ def plot_CDFs(steps_dists, names, image_name):
 
 
 if __name__ == '__main__':
-    base_dir = 'jensen_shannon/test'
+    base_dir = 'jensen_shannon/same_DTMC_2'
     # base_dir = 'jensen_shannon/0.1_error_same_DTMC'
+    Path(base_dir).mkdir(exist_ok=True)
     Path(base_dir, 'freq').mkdir(exist_ok=True)
     Path(base_dir, 'pdf').mkdir(exist_ok=True)
     Path(base_dir, 'cdf').mkdir(exist_ok=True)
     Path(base_dir, 'divergence').mkdir(exist_ok=True)
-    for n in range(0, 1):
+    for n in range(0, 28):
         try:
-            # results_json_1 = f'../results_history/same_DTMC/20241001-225331-single-random-0.01/results/{n}/results.json'
-            # results_json_2 = f'../results_history/same_DTMC/20241001-004925-N-random-0.01/results/{n}/results.json'
-            results_json_1 = f'results/{n}/results.json'
-            results_json_3 = f'results/{n}/results_forward.json'
+            results_json_1 = f'../results_history/same_DTMC_2/20241115-090238-single-random/results/{n}/results.json'
+            results_json_2 = f'../results_history/same_DTMC_2/20241115-090342-N-random/results/{n}/results.json'
+            results_json_3 = f'../results_history/same_DTMC_2/20241115-090238-single-random/results/{n}/results_forward.json'
+            results_json_4 = f'../results_history/same_DTMC_2/20241115-090342-N-random/results/{n}/results_forward.json'
+
+            # results_json_1 = f'results/{n}/results.json'
+            # results_json_3 = f'results/{n}/results_forward.json'
             desc1 = f'1 random'
             desc2 = f'N random'
             desc3 = f'1 random forward'
-            main([results_json_1, results_json_3], [desc1, desc3])
+            desc4 = f'N random forward'
+            main([results_json_1, results_json_2, results_json_3, results_json_4],
+                 [desc1, desc2, desc3, desc4])
         except Exception as e:
             print(traceback.format_exc())
