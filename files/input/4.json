@@ -46,5 +46,20 @@
     },
     "forwardCouplingConfig": {
         "enabled": true
+    },
+    "previousPerfectSamplingOutput": {
+        "avgSteps": 49.318836,
+        "sigma": 33.82634561050618,
+        "distance": 0.0011818267226475433,
+        "statisticalTest": {
+            "name": "ZTest",
+            "confidence": 0.95,
+            "maxError": 0.01,
+            "currentError": 0.00999970620674535,
+            "samplesSize": 18072,
+            "stdDev": 33.82634503640071,
+            "mean": 49.31883576803896,
+            "@class": "org.qesm.app.model.test.ZTest"
+        }
     }
 }

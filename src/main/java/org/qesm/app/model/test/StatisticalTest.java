@@ -1,10 +1,15 @@
 package org.qesm.app.model.test;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public abstract class StatisticalTest {
     protected String name;
     protected double confidence;
@@ -76,7 +81,7 @@ public abstract class StatisticalTest {
     public int getSamplesSize() {
         return currentSamplesSize;
     }
-
+    public void setSamplesSize(int samplesSize) {currentSamplesSize = samplesSize;}
     public String getName() {
         return name;
     }

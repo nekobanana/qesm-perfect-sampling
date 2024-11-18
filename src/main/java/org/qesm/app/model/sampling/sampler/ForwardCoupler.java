@@ -26,13 +26,15 @@ public class ForwardCoupler extends Sampler {
         int currentState2 = startState2;
         while (currentState1 != currentState2) {
             currentTime++;
-            List<Double> minProbabilities = new ArrayList<>(n);
+            List<Double> minProbabilities = Arrays.asList(new Double[n]);
             for (int i = 0; i < n; i++) {
                 minProbabilities.set(i, Math.min(P.get(currentState1, i), P.get(currentState2, i)));
             }
             double random = rand.nextDouble();
-            if (random < minProbabilities.stream().mapToDouble(p -> p).sum()) {
-                int commonState = RandomUtils.getValueFromDistribution(minProbabilities);
+            double minProbabilitiesSum = minProbabilities.stream().mapToDouble(p -> p).sum();
+            if (random < minProbabilitiesSum) {
+                int commonState = RandomUtils.getValueFromDistribution(minProbabilities.stream()
+                        .map(p -> p / minProbabilitiesSum).collect(Collectors.toList()));
                 currentState1 = commonState;
                 currentState2 = commonState;
             } else {
