@@ -257,14 +257,18 @@ public class Main {
             psOutput = configuration.getPreviousPerfectSamplingOutput();
         }
         //Dumb Sampling
-        if (configuration.getDumbSamplingConfig() != null && configuration.getDumbSamplingConfig().isEnabled()
-        && psOutput != null) {
+        Config.DumbSamplingConfig dsConfig = configuration.getDumbSamplingConfig();
+        if (dsConfig != null && (dsConfig.isEnabled()
+                && (psOutput != null || !dsConfig.isUsePerfectSamplingOutput()))) {
             DumbSampler dumbSampler = new DumbSampler(P);
-            for (double sigma : configuration.getDumbSamplingConfig().getSigmas()) {
-                int nSteps = getAvgStepsPlusStdDev(psOutput.getAvgSteps(), psOutput.getSigma(), sigma);
+            double avgSteps = dsConfig.isUsePerfectSamplingOutput()? psOutput.getAvgSteps(): dsConfig.getCustomMean();
+            double stdDev = dsConfig.isUsePerfectSamplingOutput()? psOutput.getSigma(): dsConfig.getCustomStdDev();
+            int samplesNumber = dsConfig.isUsePerfectSamplingOutput()? psOutput.getStatisticalTest().getSamplesSize(): dsConfig.getCustomSamplesNumber();
+            for (double sigma : dsConfig.getSigmas()) {
+                int nSteps = getAvgStepsPlusStdDev(avgSteps, stdDev, sigma);
                 DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
                         .steps(nSteps);
-                dumbSampleRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+                dumbSampleRunner.run(samplesNumber);
                 Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
                 System.out.println("\nDumb sampling (" + sigma + " sigma): ");
                 System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
@@ -291,11 +295,15 @@ public class Main {
         }
 
         //Forward Coupling
-        if (configuration.getForwardCouplingConfig() != null && configuration.getForwardCouplingConfig().isEnabled()
-                && psOutput != null) {
+        Config.ForwardCouplingConfig forwardCouplingConfig = configuration.getForwardCouplingConfig();
+        if (forwardCouplingConfig != null && forwardCouplingConfig.isEnabled()
+//                && (psOutput != null || !forwardCouplingConfig.isUsePerfectSamplingSampleSize())
+        ) {
             ForwardCoupler forwardCoupler = new ForwardCoupler(P);
             ForwardCouplingRunner forwardCouplingRunner = (new ForwardCouplingRunner(forwardCoupler));
-            forwardCouplingRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+//            int sampleSize = forwardCouplingConfig.isUsePerfectSamplingSampleSize()? psOutput.getStatisticalTest().getSamplesSize():
+//                    forwardCouplingConfig.getSampleSize();
+            forwardCouplingRunner.run(0);
             System.out.println("\nForward coupling");
             Output.ForwardCouplingOutput fcOutput = new Output.ForwardCouplingOutput();
             fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());

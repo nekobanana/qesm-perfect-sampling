@@ -1,0 +1,65 @@
+{
+    "seed": 965414933,
+    "description": "Dumb sampling based on 0.95 quantile of forward coupling",
+    "dtmcGeneratorConfig": {
+        "n": 256,
+        "connectSCCs": false,
+        "edgesNumberDistribution": {
+            "n": 4,
+            "distributionType": "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+        },
+        "edgesLocalityDistribution": {
+            "min": -16,
+            "max": 16,
+            "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
+        },
+        "selfLoopValue": null
+    },
+    "perfectSamplingConfig": {
+        "enabled": false,
+        "statisticalTestConfig": {
+            "confidence": 0.95,
+            "error": 0.01,
+            "testClass": "org.qesm.app.model.test.ZTest"
+        },
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
+        "pythonHistogramImage": true,
+        "pythonLastSequenceImage": false
+    },
+    "dumbSamplingConfig": {
+        "enabled": true,
+        "sigmas": [
+            0
+        ],
+        "usePerfectSamplingOutput": false,
+        "customMean": 363.0,
+        "customStdDev": 0,
+        "customSamplesNumber": 11779
+    },
+    "transientAnalysisConfig": {
+        "enabled": false,
+        "maxDistanceToSteadyState": 0.0001
+    },
+    "forwardSamplingConfig": {
+        "enabled": false,
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper"
+    },
+    "forwardCouplingConfig": {
+        "enabled": false
+    },
+    "previousPerfectSamplingOutput": {
+        "avgSteps": 567.84064,
+        "sigma": 314.43410043015615,
+        "distance": 3.745103957412612e-05,
+        "statisticalTest": {
+            "name": "ZTest",
+            "confidence": 0.95,
+            "maxError": 0.01,
+            "currentError": 0.00999993177076065,
+            "samplesSize": 11779,
+            "stdDev": 314.4340972057645,
+            "mean": 567.8406486119364,
+            "@class": "org.qesm.app.model.test.ZTest"
+        }
+    }
+}

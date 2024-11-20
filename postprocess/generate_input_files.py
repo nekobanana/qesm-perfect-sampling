@@ -35,7 +35,7 @@ def main():
     # Modello di configurazione
     config_template = {
         "seed": None,
-        "description": "True forward coupling with run number equal to PS run number with single random",
+        "description": "Dumb sampling based on 0.95 quantile of forward coupling",
         "dtmcGeneratorConfig": {
             "n": None,  # Questo sarà sostituito
             "connectSCCs": False,
@@ -62,8 +62,12 @@ def main():
             "pythonLastSequenceImage": False,
         },
         "dumbSamplingConfig": {
-            "enabled": False,
-            "sigmas": [-2.0, -1.0, 0.0, 1.0, 2.0]
+            "enabled": True,
+            "sigmas": [-2.0, -1.0, 0.0, 1.0, 2.0],
+            "usePerfectSamplingOutput": False,
+            "customMean": None,
+            "customStdDev": None,
+            "customSamplesNumber": None
         },
         "transientAnalysisConfig": {
             "enabled": False,
@@ -74,7 +78,9 @@ def main():
             "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper"
         },
         "forwardCouplingConfig": {
-            "enabled": True,
+            "enabled": False
+            # "usePerfectSamplingSampleSize": False,
+            # "SampleSize": None
         }
     }
 
@@ -86,6 +92,7 @@ def main():
         config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["min"] = outgoing_edges_min
         config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["max"] = outgoing_edges_max
         config["dtmcGeneratorConfig"]["n"] = N
+        # config["forwardCouplingConfig"]["sampleSize"] = N
 
         # Nome del file
         filename = f"{index}.json"

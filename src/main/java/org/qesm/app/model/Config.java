@@ -218,6 +218,10 @@ public class Config {
     public static class DumbSamplingConfig {
         private boolean enabled;
         private double[] sigmas;
+        private boolean usePerfectSamplingOutput;
+        private int customMean;
+        private int customStdDev;
+        private int customSamplesNumber;
 
         public boolean isEnabled() {
             return enabled;
@@ -233,6 +237,38 @@ public class Config {
 
         public void setSigmas(double[] sigmas) {
             this.sigmas = sigmas;
+        }
+
+        public boolean isUsePerfectSamplingOutput() {
+            return usePerfectSamplingOutput;
+        }
+
+        public void setUsePerfectSamplingOutput(boolean usePerfectSamplingOutput) {
+            this.usePerfectSamplingOutput = usePerfectSamplingOutput;
+        }
+
+        public int getCustomMean() {
+            return customMean;
+        }
+
+        public void setCustomMean(int customMean) {
+            this.customMean = customMean;
+        }
+
+        public int getCustomStdDev() {
+            return customStdDev;
+        }
+
+        public void setCustomStdDev(int customStdDev) {
+            this.customStdDev = customStdDev;
+        }
+
+        public int getCustomSamplesNumber() {
+            return customSamplesNumber;
+        }
+
+        public void setCustomSamplesNumber(int customSamplesNumber) {
+            this.customSamplesNumber = customSamplesNumber;
         }
     }
 
@@ -280,6 +316,8 @@ public class Config {
 
     public static class ForwardCouplingConfig {
         private boolean enabled;
+//        private boolean usePerfectSamplingSampleSize = false;
+//        private int sampleSize;
 
         public boolean isEnabled() {
             return enabled;
@@ -288,5 +326,21 @@ public class Config {
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
         }
+
+//        public boolean isUsePerfectSamplingSampleSize() {
+//            return usePerfectSamplingSampleSize;
+//        }
+//
+//        public void setUsePerfectSamplingSampleSize(boolean usePerfectSamplingSampleSize) {
+//            this.usePerfectSamplingSampleSize = usePerfectSamplingSampleSize;
+//        }
+//
+//        public int getSampleSize() {
+//            return sampleSize;
+//        }
+//
+//        public void setSampleSize(int sampleSize) {
+//            this.sampleSize = sampleSize;
+//        }
     }
 }

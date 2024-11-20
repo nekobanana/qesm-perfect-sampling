@@ -31,56 +31,66 @@ def extend_histogram(observed_freq, bin_edges, min_value, max_value):
     return new_observed_freq, new_bin_edges
 
 
-def main(results, names):
+def main(results, names, quantiles = None, doJS = False):
+    if quantiles is None:
+        quantiles = []
     experiment_name = os.path.basename(os.path.dirname(results[0]))
-    # assert experiment_name == os.path.basename(os.path.dirname(results_json_2))
     histograms, steps = [], []
+    avg_data = []
     for result, name in zip(results, names):
         histogram, s = get_histogram(result)
         histograms.append(histogram)
         steps.append(s)
+        avg_data.append({
+            "name": name,
+            "mean": np.mean(s),
+            "std": np.std(s),
+            "cv": np.std(s) / np.mean(s),
+            "quantiles": {}
+        })
+        quantile_values = np.quantile(s, quantiles)
+        for k, v in zip(quantiles, quantile_values):
+            avg_data[-1]['quantiles'][k] = v
+
+    with open(f'{base_dir}/distributions/{experiment_name}.json', 'w') as fp:
+            json.dump(avg_data, fp, indent=4)
     min_value = min(*[h[1][0] for h in histograms])
     max_value = max(*[h[1][-1] for h in histograms])
-    # min_value = min(histogram1[1][0], histogram2[1][0])
-    # max_value = max(histogram1[1][-1], histogram2[1][-1])
     for i in range(len(histograms)):
         histograms[i] = extend_histogram(histograms[i][0], histograms[i][1], min_value, max_value)
-    # histogram1 = extend_histogram(histogram1[0], histogram1[1], min_value, max_value)
-    # histogram2 = extend_histogram(histogram2[0], histogram2[1], min_value, max_value)
     distances = []
     for hist in histograms:
         distances.append(hist[0] / np.linalg.norm(hist))
-    # dist1 = histogram1[0] / np.linalg.norm(histogram1)
     plot_dists(steps, names, f'{base_dir}/freq/{experiment_name}', False)
     plot_dists(steps, names, f'{base_dir}/pdf/{experiment_name}', True)
     plot_CDFs(steps, names, f'{base_dir}/cdf/{experiment_name}')
 
-    summary_pairs = []
-
-    for (path1, name1, dist1), (path2, name2, dist2) in itertools.combinations(zip(results, names, distances), 2):
-        div_js = distance.jensenshannon(dist1, dist2)
-        print(f'Jensen-Shannon divergence: {div_js}')
-        summary_pairs.append({
-            'distributions': [
-                {
-                    'path': path1,
-                    'description': name1
-                },
-                {
-                    'path': path2,
-                    'description': name2
-                }
-            ],
-            'jensen-shannon-divergence': div_js
-        })
-    summary = {
-        'graph': experiment_name,
-        'comparisons': []
-    }
-    for pair in summary_pairs:
-        summary['comparisons'].append(pair)
-    with open(f'{base_dir}/divergence/{experiment_name}.json', 'w') as fp:
-        json.dump(summary, fp, indent=4)
+    if doJS:
+        summary_pairs = []
+        for (path1, name1, dist1), (path2, name2, dist2) in itertools.combinations(zip(results, names, distances), 2):
+            div_js = distance.jensenshannon(dist1, dist2)
+            print(f'Jensen-Shannon divergence: {div_js}')
+            summary_pairs.append({
+                'distributions': [
+                    {
+                        'path': path1,
+                        'description': name1
+                    },
+                    {
+                        'path': path2,
+                        'description': name2
+                    }
+                ],
+                'jensen-shannon-divergence': div_js
+            })
+        summary = {
+            'graph': experiment_name,
+            'comparisons': []
+        }
+        for pair in summary_pairs:
+            summary['comparisons'].append(pair)
+        with open(f'{base_dir}/divergence/{experiment_name}.json', 'w') as fp:
+            json.dump(summary, fp, indent=4)
 
 def plot_dists(steps_dists, names, image_name, normalized=False):
     plt.figure(figsize=(10, 6))
@@ -105,29 +115,31 @@ def plot_CDFs(steps_dists, names, image_name):
     plt.close()
 
 
-
 if __name__ == '__main__':
-    base_dir = 'jensen_shannon/same_DTMC_2'
+    base_dir = 'jensen_shannon/same_DTMC_2_coupling'
     # base_dir = 'jensen_shannon/0.1_error_same_DTMC'
     Path(base_dir).mkdir(exist_ok=True)
     Path(base_dir, 'freq').mkdir(exist_ok=True)
     Path(base_dir, 'pdf').mkdir(exist_ok=True)
     Path(base_dir, 'cdf').mkdir(exist_ok=True)
     Path(base_dir, 'divergence').mkdir(exist_ok=True)
+    Path(base_dir, 'distributions').mkdir(exist_ok=True)
     for n in range(0, 28):
         try:
             results_json_1 = f'../results_history/same_DTMC_2/20241115-090238-single-random/results/{n}/results.json'
             results_json_2 = f'../results_history/same_DTMC_2/20241115-090342-N-random/results/{n}/results.json'
-            results_json_3 = f'../results_history/same_DTMC_2/20241115-090238-single-random/results/{n}/results_forward.json'
-            results_json_4 = f'../results_history/same_DTMC_2/20241115-090342-N-random/results/{n}/results_forward.json'
+            results_json_3 = f'../results_history/same_DTMC_2/20241119-180022-forward-coupling/results/{n}/results_forward_coupling.json'
+            # results_json_3 = f'../results_history/same_DTMC_2/20241115-090238-single-random/results/{n}/results_forward.json'
+            # results_json_4 = f'../results_history/same_DTMC_2/20241115-090342-N-random/results/{n}/results_forward.json'
 
             # results_json_1 = f'results/{n}/results.json'
             # results_json_3 = f'results/{n}/results_forward.json'
             desc1 = f'1 random'
             desc2 = f'N random'
-            desc3 = f'1 random forward'
-            desc4 = f'N random forward'
-            main([results_json_1, results_json_2, results_json_3, results_json_4],
-                 [desc1, desc2, desc3, desc4])
+            desc3 = f'forward coupling'
+            # desc3 = f'1 random forward'
+            # desc4 = f'N random forward'
+            main([results_json_1, results_json_2, results_json_3],
+                 [desc1, desc2, desc3], [0.8, 0.85, 0.9, 0.95] , False)
         except Exception as e:
             print(traceback.format_exc())

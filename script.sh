@@ -1,7 +1,7 @@
 #!/bin/bash
 INPUT_FILES_DIR=files/input
-OUTPUT_FILES_DIR=results_history/20240926-172746/files/output
-TABLES_FILES_DIR=results_history/20240926-172746/tables
+OUTPUT_FILES_DIR=results_history/same_DTMC_2/20241115-090342-N-random/files/output
+TABLES_FILES_DIR=results_history/same_DTMC_2/20241115-090342-N-random/tables
 POST_PROCESS_RESULTS_DIR=postprocess/results
 PYTHON_VENV=postprocess/venv/bin/python
 JAR_FILE=target/QESM_perfect_sampling-1.0-SNAPSHOT-jar-with-dependencies.jar

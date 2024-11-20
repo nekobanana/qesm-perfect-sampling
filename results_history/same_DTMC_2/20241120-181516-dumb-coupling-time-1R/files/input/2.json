@@ -1,0 +1,65 @@
+{
+    "seed": -246720600,
+    "description": "Dumb sampling based on 0.95 quantile of forward coupling",
+    "dtmcGeneratorConfig": {
+        "n": 16,
+        "connectSCCs": false,
+        "edgesNumberDistribution": {
+            "n": 2,
+            "distributionType": "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+        },
+        "edgesLocalityDistribution": {
+            "min": -4,
+            "max": 4,
+            "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
+        },
+        "selfLoopValue": null
+    },
+    "perfectSamplingConfig": {
+        "enabled": false,
+        "statisticalTestConfig": {
+            "confidence": 0.95,
+            "error": 0.01,
+            "testClass": "org.qesm.app.model.test.ZTest"
+        },
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
+        "pythonHistogramImage": true,
+        "pythonLastSequenceImage": false
+    },
+    "dumbSamplingConfig": {
+        "enabled": true,
+        "sigmas": [
+            0
+        ],
+        "usePerfectSamplingOutput": false,
+        "customMean": 40.19999999999999,
+        "customStdDev": 0,
+        "customSamplesNumber": 13394
+    },
+    "transientAnalysisConfig": {
+        "enabled": false,
+        "maxDistanceToSteadyState": 0.0001
+    },
+    "forwardSamplingConfig": {
+        "enabled": false,
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper"
+    },
+    "forwardCouplingConfig": {
+        "enabled": false
+    },
+    "previousPerfectSamplingOutput": {
+        "avgSteps": 53.520382,
+        "sigma": 31.60128347932146,
+        "distance": 0.00032921752509615143,
+        "statisticalTest": {
+            "name": "ZTest",
+            "confidence": 0.95,
+            "maxError": 0.01,
+            "currentError": 0.009999504176028103,
+            "samplesSize": 13394,
+            "stdDev": 31.601284009077652,
+            "mean": 53.52038226071375,
+            "@class": "org.qesm.app.model.test.ZTest"
+        }
+    }
+}

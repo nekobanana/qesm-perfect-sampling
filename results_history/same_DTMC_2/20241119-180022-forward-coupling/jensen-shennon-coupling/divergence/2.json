@@ -1,0 +1,44 @@
+{
+    "graph": "2",
+    "comparisons": [
+        {
+            "distributions": [
+                {
+                    "path": "../results_history/same_DTMC_2/20241115-090238-single-random/results/2/results.json",
+                    "description": "1 random"
+                },
+                {
+                    "path": "../results_history/same_DTMC_2/20241115-090342-N-random/results/2/results.json",
+                    "description": "N random"
+                }
+            ],
+            "jensen-shannon-divergence": 0.1417714882911965
+        },
+        {
+            "distributions": [
+                {
+                    "path": "../results_history/same_DTMC_2/20241115-090238-single-random/results/2/results.json",
+                    "description": "1 random"
+                },
+                {
+                    "path": "../results_history/same_DTMC_2/20241119-180022-forward-coupling/results/2/results_forward_coupling.json",
+                    "description": "forward coupling"
+                }
+            ],
+            "jensen-shannon-divergence": 0.6160531674112562
+        },
+        {
+            "distributions": [
+                {
+                    "path": "../results_history/same_DTMC_2/20241115-090342-N-random/results/2/results.json",
+                    "description": "N random"
+                },
+                {
+                    "path": "../results_history/same_DTMC_2/20241119-180022-forward-coupling/results/2/results_forward_coupling.json",
+                    "description": "forward coupling"
+                }
+            ],
+            "jensen-shannon-divergence": 0.6663517895143086
+        }
+    ]
+}

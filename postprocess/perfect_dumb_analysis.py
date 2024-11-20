@@ -1,12 +1,8 @@
 import json
-import math
 import os
 from collections import defaultdict
 
-import numpy as np
 import pandas as pd
-import scipy.stats as stats
-import matplotlib.pyplot as plt
 
 def generate_RQ2_table(java_results_dir, table_path):
     results = defaultdict(lambda: [])
@@ -24,12 +20,10 @@ def generate_RQ2_table(java_results_dir, table_path):
         results['ps-mu-steps'].append(f"{output_json['perfectSamplingOutput']['avgSteps']:.2f}")
         results['ps-sigma-steps'].append(f"{output_json['perfectSamplingOutput']['sigma']:.2f}")
         results['ps-distance'].append(f"{output_json['perfectSamplingOutput']['distance']:.3E}")
-        results['d0-steps'].append(output_json['dumbSamplingOutputs'][0]['steps'])
-        results['d0-distance'].append(f"{output_json['dumbSamplingOutputs'][0]['distance']:.3E}")
-        results['d1-steps'].append(output_json['dumbSamplingOutputs'][1]['steps'])
-        results['d1-distance'].append(f"{output_json['dumbSamplingOutputs'][1]['distance']:.3E}")
-        results['d2-steps'].append(output_json['dumbSamplingOutputs'][2]['steps'])
-        results['d2-distance'].append(f"{output_json['dumbSamplingOutputs'][2]['distance']:.3E}")
+        for ds_output in output_json['dumbSamplingOutputs']:
+            sigma = ds_output['sigmas']
+            results[f'd{sigma}-steps'].append(ds_output['steps'])
+            results[f'd{sigma}-distance'].append(f"{ds_output['distance']:.3E}")
     df = pd.DataFrame.from_dict(results)
     df = df.sort_values(by=['N', 'edges-number', 'locality-max'])
     df.to_csv(table_path, index=False)

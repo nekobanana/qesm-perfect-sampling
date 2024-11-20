@@ -1,0 +1,19 @@
+[ {
+  "sampledState" : 3,
+  "steps" : 1
+}, {
+  "sampledState" : 2,
+  "steps" : 1
+}, {
+  "sampledState" : 1,
+  "steps" : 2
+}, {
+  "sampledState" : 1,
+  "steps" : 10
+}, {
+  "sampledState" : 1,
+  "steps" : 10
+}, {
+  "sampledState" : 1,
+  "steps" : 1
+} ]

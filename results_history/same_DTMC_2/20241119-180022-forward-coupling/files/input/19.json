@@ -1,0 +1,53 @@
+{
+    "seed": 1671578536,
+    "description": "True forward coupling with run number equal to PS run number with single random",
+    "dtmcGeneratorConfig": {
+        "n": 256,
+        "connectSCCs": false,
+        "edgesNumberDistribution": {
+            "n": 4,
+            "distributionType": "org.qesm.app.model.generator.distribution.SingleValueDistribution"
+        },
+        "edgesLocalityDistribution": {
+            "min": -4,
+            "max": 4,
+            "distributionType": "org.qesm.app.model.generator.distribution.UniformDistribution"
+        },
+        "selfLoopValue": null
+    },
+    "perfectSamplingConfig": {
+        "enabled": false,
+        "statisticalTestConfig": {
+            "confidence": 0.95,
+            "error": 0.01,
+            "testClass": "org.qesm.app.model.test.ZTest"
+        },
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper",
+        "pythonHistogramImage": true,
+        "pythonLastSequenceImage": false
+    },
+    "dumbSamplingConfig": {
+        "enabled": false,
+        "sigmas": [
+            -2.0,
+            -1.0,
+            0.0,
+            1.0,
+            2.0
+        ],
+        "usePerfectSamplingSampleSize": false,
+        "customMean": null,
+        "customStdDev": null
+    },
+    "transientAnalysisConfig": {
+        "enabled": false,
+        "maxDistanceToSteadyState": 0.0001
+    },
+    "forwardSamplingConfig": {
+        "enabled": false,
+        "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper"
+    },
+    "forwardCouplingConfig": {
+        "enabled": true
+    }
+}

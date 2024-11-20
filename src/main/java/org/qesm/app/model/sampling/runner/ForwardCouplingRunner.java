@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,11 +35,16 @@ public class ForwardCouplingRunner implements SamplerRunner {
     public void run(int runs) {
         avgSteps = null;
         stdDevSteps = null;
-        for (int i = 0; i < runs; i++) {
-            for (int[] pair: new Combinations(coupler.getN(), 2)) {
-                coupler.reset();
-                results.add(coupler.runUntilCoalescence(pair[0], pair[1]));
-            }
+        Combinations couples = new Combinations(coupler.getN(), 2);
+        Iterator<int[]> couplesIt = couples.iterator();
+//        for (int i = 0; i < runs; i++) {
+        for (int[] pair : couples) {
+            coupler.reset();
+//            if (!couplesIt.hasNext()) {
+//                couplesIt = couples.iterator();
+//            }
+//            int[] pair=couplesIt.next();
+            results.add(coupler.runUntilCoalescence(pair[0], pair[1]));
         }
     }
 
