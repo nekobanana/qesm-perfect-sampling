@@ -37,6 +37,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.math.Quantiles.percentiles;
+
 public class Main {
     public static Map<Integer, Double> getSteadyStateDistributionOris(Matrix P) {
         MutableValueGraph<Object, Double> graph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
@@ -56,7 +58,7 @@ public class Main {
         assert(P.rows() == P.columns());
         int n = P.rows();
         double[] pi_0_arr = new double[n];
-        Arrays.fill(pi_0_arr, (double) 1 /n);
+        Arrays.fill(pi_0_arr, (double) 1 / n);
         Matrix pi_0 = Matrix.from1DArray(1, n, pi_0_arr);
         double[] ssDist_arr = new double[n];
         for (int i = 0; i < n; i++) {
@@ -132,13 +134,11 @@ public class Main {
 
             Config config = new Config();
             config.setDescription(description);
-            config.setDtmcGeneratorConfig(new Config.DTMCGeneratorConfig());
             config.getDtmcGeneratorConfig().setN(N);
             config.getDtmcGeneratorConfig().setConnectSCCs(connectSCCs);
             config.getDtmcGeneratorConfig().setEdgesNumberDistribution(edgesNumberDistribution);
             config.getDtmcGeneratorConfig().setEdgesLocalityDistribution(edgesLocalityDistribution);
             config.getDtmcGeneratorConfig().setSelfLoopValue(selfLoopValue);
-            config.setPerfectSamplingConfig(new Config.PerfectSamplingConfig());
             config.getPerfectSamplingConfig().setEnabled(true);
             config.getPerfectSamplingConfig().getStatisticalTestConfig().setTestClass(testClass);
             config.getPerfectSamplingConfig().getStatisticalTestConfig().setConfidence(testConfidence);
@@ -146,12 +146,10 @@ public class Main {
             config.getPerfectSamplingConfig().setRandomHelperClass(randomHelperClass);
             config.getPerfectSamplingConfig().setPythonHistogramImage(outputHistogram);
             config.getPerfectSamplingConfig().setPythonLastSequenceImage(outputSeqDiagram);
-            config.setTransientAnalysisConfig(new Config.TransientAnalysisConfig());
             config.getTransientAnalysisConfig().setEnabled(true);
             config.getTransientAnalysisConfig().setMaxDistanceToSteadyState(0.0001);
-            config.setDumbSamplingConfig(new Config.DumbSamplingConfig());
-            config.getDumbSamplingConfig().setEnabled(true);
-            config.getDumbSamplingConfig().setSigmas(new double[]{-2, -1, 0, 1, 2});
+            config.getDumbSamplingConfig().getDumbSamplingPSConfig().setEnabled(true);
+            config.getDumbSamplingConfig().getDumbSamplingPSConfig().setPerfectSamplingSigmas(new double[]{-2, -1, 0, 1, 2});
             config.setForwardSamplingConfig(new Config.ForwardSamplingConfig());
             config.getForwardSamplingConfig().setEnabled(true);
             config.getForwardSamplingConfig().setRandomHelperClass(randomHelperClass);
@@ -202,16 +200,19 @@ public class Main {
         output.getDtmcGeneratorOutput().setP(P);
 
         // Steady state distribution
-
+        System.out.println("\nSteady state distribution...");
         Map<Integer, Double> solutionSS = getSteadyStateDistributionOris(P);
-        System.out.println(solutionSS);
+//        System.out.println(solutionSS);
+        System.out.println("Done");
         output.setSteadyStateAnalysisOutput(new Output.SteadyStateAnalysisOutput());
         output.getSteadyStateAnalysisOutput().setSteadyStateDistribution(solutionSS);
 
         // Transient analysis
         if (configuration.getTransientAnalysisConfig() != null && configuration.getTransientAnalysisConfig().isEnabled()) {
-            System.out.println("Transient analysis...");
-            Map<Integer, Matrix> transientResults = transientAnalysis(P, solutionSS, 0.0001);
+            System.out.println("\nTransient analysis...");
+            double errorStopCondition = configuration.getTransientAnalysisConfig().getMaxDistanceToSteadyState();
+            Map<Integer, Matrix> transientResults = transientAnalysis(P, solutionSS, errorStopCondition);
+            System.out.println("Done");
             Map<String, Object> transientJson = new HashMap<>();
             transientJson.put("steadyStateDistribution", solutionSS);
             transientJson.put("transientAnalysis", transientResults);
@@ -221,9 +222,10 @@ public class Main {
         }
         String dirName = FilenameUtils.removeExtension(outputFileName);
         Output.PerfectSamplingOutput psOutput = null;
+
         // Perfect Sampling
         if (configuration.getPerfectSamplingConfig() != null && configuration.getPerfectSamplingConfig().isEnabled()) {
-            System.out.println("Running...");
+            System.out.println("\nPerfect sampling: ");
             Config.PerfectSamplingConfig psConfig = configuration.getPerfectSamplingConfig();
             PerfectSampler samplerCFTP = new PerfectSampler(P, psConfig.getRandomHelperClass(), psConfig.isPythonLastSequenceImage());
             PerfectSampleRunner perfectSampleRunner = new PerfectSampleRunner(samplerCFTP);
@@ -233,8 +235,8 @@ public class Main {
             perfectSampleRunner.run(statTest);
             System.out.println("Runs: " + statTest.getSamplesSize() + "\t" + statTest.toString());
             Map<Integer, Double> piCFTP = perfectSampleRunner.getStatesDistribution(false);
-            System.out.println("\nPerfect sampling: ");
-            System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+            System.out.println("Distance / N: " + Metrics.distanceL2DividedByN(solutionSS, piCFTP, N));
+            System.out.println("Total variation distance: " + Metrics.totalVariationDistance(solutionSS, piCFTP, N));
             try {
                 if (psConfig.isPythonHistogramImage()) {
                     perfectSampleRunner.writeResultsOutput(dirName);
@@ -249,51 +251,30 @@ public class Main {
             psOutput.setStatisticalTest(statTest);
             psOutput.setAvgSteps(perfectSampleRunner.getAvgSteps());
             psOutput.setSigma(perfectSampleRunner.getStdDevSteps());
-            psOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piCFTP, N));
+            psOutput.setL2DividedByNDistance(Metrics.distanceL2DividedByN(solutionSS, piCFTP, N));
+            psOutput.setTotalVariationDistance(Metrics.totalVariationDistance(solutionSS, piCFTP, N));
             output.setPerfectSamplingOutput(psOutput);
-        }
-
-        if (psOutput == null) {
-            psOutput = configuration.getPreviousPerfectSamplingOutput();
-        }
-        //Dumb Sampling
-        Config.DumbSamplingConfig dsConfig = configuration.getDumbSamplingConfig();
-        if (dsConfig != null && (dsConfig.isEnabled()
-                && (psOutput != null || !dsConfig.isUsePerfectSamplingOutput()))) {
-            DumbSampler dumbSampler = new DumbSampler(P);
-            double avgSteps = dsConfig.isUsePerfectSamplingOutput()? psOutput.getAvgSteps(): dsConfig.getCustomMean();
-            double stdDev = dsConfig.isUsePerfectSamplingOutput()? psOutput.getSigma(): dsConfig.getCustomStdDev();
-            int samplesNumber = dsConfig.isUsePerfectSamplingOutput()? psOutput.getStatisticalTest().getSamplesSize(): dsConfig.getCustomSamplesNumber();
-            for (double sigma : dsConfig.getSigmas()) {
-                int nSteps = getAvgStepsPlusStdDev(avgSteps, stdDev, sigma);
-                DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
-                        .steps(nSteps);
-                dumbSampleRunner.run(samplesNumber);
-                Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
-                System.out.println("\nDumb sampling (" + sigma + " sigma): ");
-                System.out.println("Distance / N: " + Metrics.distanceL2PerN(solutionSS, piDumb, N));
-                Output.DumbSamplingOutput dsOutput = new Output.DumbSamplingOutput();
-                dsOutput.setSteps(nSteps);
-                dsOutput.setSigmas(sigma);
-                dsOutput.setDistance(Metrics.distanceL2PerN(solutionSS, piDumb, N));
-                output.getDumbSamplingOutputs().add(dsOutput);
-            }
         }
 
         //Forward Sampling
         if (configuration.getForwardSamplingConfig() != null && configuration.getForwardSamplingConfig().isEnabled()
-        && psOutput != null) {
+                && psOutput != null) {
             ForwardSampler forwardSampler = new ForwardSampler(P, configuration.getForwardSamplingConfig().getRandomHelperClass());
             ForwardSampleRunner forwardCouplingRunner = (new ForwardSampleRunner(forwardSampler));
-            forwardCouplingRunner.run(psOutput.getStatisticalTest().getSamplesSize());
             System.out.println("\nForward sampling");
+            forwardCouplingRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+            System.out.println("Done");
             Output.ForwardSamplingOutput fcOutput = new Output.ForwardSamplingOutput();
             fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());
             fcOutput.setSigma(forwardCouplingRunner.getStdDevSteps());
             output.setForwardSamplingOutput(fcOutput);
             forwardCouplingRunner.writeResultsOutput(dirName);
         }
+        if (psOutput == null) {
+            psOutput = configuration.getPreviousPerfectSamplingOutput();
+        }
 
+        Output.ForwardCouplingOutput fcOutput = null;
         //Forward Coupling
         Config.ForwardCouplingConfig forwardCouplingConfig = configuration.getForwardCouplingConfig();
         if (forwardCouplingConfig != null && forwardCouplingConfig.isEnabled()
@@ -305,11 +286,66 @@ public class Main {
 //                    forwardCouplingConfig.getSampleSize();
             forwardCouplingRunner.run(0);
             System.out.println("\nForward coupling");
-            Output.ForwardCouplingOutput fcOutput = new Output.ForwardCouplingOutput();
+            fcOutput = new Output.ForwardCouplingOutput();
+            System.out.println("Done");
             fcOutput.setAvgSteps(forwardCouplingRunner.getAvgSteps());
             fcOutput.setSigma(forwardCouplingRunner.getStdDevSteps());
+            int[] numbers = new int[101];
+            for (int i = 0; i < numbers.length; i++) {
+                numbers[i] = i;
+            }
+            Map<Integer, Double> percentiles = percentiles().indexes(numbers).compute(forwardCouplingRunner.getResultsSteps());
+            fcOutput.setQuantiles(percentiles.values().toArray(new Double[0]));
             output.setForwardCouplingOutput(fcOutput);
             forwardCouplingRunner.writeResultsOutput(dirName);
+        }
+
+        //Dumb Sampling
+        Config.DumbSamplingConfig dsConfig = configuration.getDumbSamplingConfig();
+        if (dsConfig != null && dsConfig.getDumbSamplingPSConfig() != null) {
+            if (dsConfig.getDumbSamplingPSConfig().isEnabled()) {
+                DumbSampler dumbSampler = new DumbSampler(P);
+                int samplesNumber = psOutput.getStatisticalTest().getSamplesSize();
+                for (double sigma : dsConfig.getDumbSamplingPSConfig().getPerfectSamplingSigmas()) {
+                    int nSteps = getAvgStepsPlusStdDev(psOutput.getAvgSteps(), psOutput.getSigma(), sigma);
+                    DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler))
+                            .steps(nSteps);
+                    System.out.println("\nDumb sampling (Perfect Sampling mean + " + sigma + " sigma): ");
+                    dumbSampleRunner.run(samplesNumber);
+                    Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
+                    System.out.println("Distance / N: " + Metrics.distanceL2DividedByN(solutionSS, piDumb, N));
+                    System.out.println("Total variation distance: " + Metrics.totalVariationDistance(solutionSS, piDumb, N));
+                    Output.DumbSamplingOutputPS dsOutput = new Output.DumbSamplingOutputPS();
+                    dsOutput.setSteps(nSteps);
+                    dsOutput.setSigma(sigma);
+                    dsOutput.setDescription("Perfect Sampling");
+                    dsOutput.setL2DividedByNDistance(Metrics.distanceL2DividedByN(solutionSS, piDumb, N));
+                    dsOutput.setTotalVariationDistance(Metrics.totalVariationDistance(solutionSS, piDumb, N));
+                    output.getDumbSamplingOutputsPS().add(dsOutput);
+                }
+            }
+            if (dsConfig.getDumbSamplingFCConfig().isEnabled()) {
+                if (fcOutput == null) {
+                    fcOutput = configuration.getPreviousForwardCouplingOutput();
+                }
+                DumbSampler dumbSampler = new DumbSampler(P);
+                for (int percentile : dsConfig.getDumbSamplingFCConfig().getForwardCouplingPercentiles()) {
+                    int nSteps = fcOutput.getQuantiles()[percentile].intValue();
+                    DumbSampleRunner dumbSampleRunner = (new DumbSampleRunner(dumbSampler)).steps(nSteps);
+                    System.out.println("\nDumb sampling (Forward Coupling " + percentile + " percentile): ");
+                    dumbSampleRunner.run(psOutput.getStatisticalTest().getSamplesSize());
+                    Map<Integer, Double> piDumb = dumbSampleRunner.getStatesDistribution(false);
+                    System.out.println("Distance / N: " + Metrics.distanceL2DividedByN(solutionSS, piDumb, N));
+                    System.out.println("Total variation distance: " + Metrics.totalVariationDistance(solutionSS, piDumb, N));
+                    Output.DumbSamplingOutputFC dsOutput = new Output.DumbSamplingOutputFC();
+                    dsOutput.setDescription("Forward Coupling");
+                    dsOutput.setSteps(nSteps);
+                    dsOutput.setQuantile(percentile);
+                    dsOutput.setL2DividedByNDistance(Metrics.distanceL2DividedByN(solutionSS, piDumb, N));
+                    dsOutput.setTotalVariationDistance(Metrics.totalVariationDistance(solutionSS, piDumb, N));
+                    output.getDumbSamplingOutputsFC().add(dsOutput);
+                }
+            }
         }
 
         System.out.println("\n\n");

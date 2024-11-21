@@ -35,7 +35,7 @@ def main():
     # Modello di configurazione
     config_template = {
         "seed": None,
-        "description": "Dumb sampling based on 0.95 quantile of forward coupling",
+        "description": "All experiments (single random): perfect sampling, dumb sampling based on perfect sampling mean and std. dev., forward sampling, forward coupling, dumb sampling based on forward coupling quantiles, transient analysis",
         "dtmcGeneratorConfig": {
             "n": None,  # Questo sarà sostituito
             "connectSCCs": False,
@@ -51,7 +51,7 @@ def main():
             "selfLoopValue": None,
         },
         "perfectSamplingConfig": {
-            "enabled" : False,
+            "enabled" : True,
             "statisticalTestConfig": {
                 "confidence": 0.95,
                 "error": 0.01,
@@ -62,25 +62,25 @@ def main():
             "pythonLastSequenceImage": False,
         },
         "dumbSamplingConfig": {
-            "enabled": True,
-            "sigmas": [-2.0, -1.0, 0.0, 1.0, 2.0],
-            "usePerfectSamplingOutput": False,
-            "customMean": None,
-            "customStdDev": None,
-            "customSamplesNumber": None
+            "dumbSamplingPSConfig": {
+                "enabled": True,
+                "perfectSamplingSigmas": [-2.0, -1.0, 0.0, 1.0, 2.0],
+            },
+            "dumbSamplingFCConfig": {
+                "enabled": True,
+                "forwardCouplingPercentiles": [50, 60, 70, 80, 85, 90, 95, 100],
+            }
         },
         "transientAnalysisConfig": {
-            "enabled": False,
-            "maxDistanceToSteadyState": 0.0001
+            "enabled": True,
+            "maxDistanceToSteadyState": 0.0000001,
         },
         "forwardSamplingConfig": {
-            "enabled": False,
+            "enabled": True,
             "randomHelperClass": "org.qesm.app.model.sampling.sampler.random.NRandomHelper"
         },
         "forwardCouplingConfig": {
-            "enabled": False
-            # "usePerfectSamplingSampleSize": False,
-            # "SampleSize": None
+            "enabled": True
         }
     }
 
@@ -92,7 +92,6 @@ def main():
         config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["min"] = outgoing_edges_min
         config["dtmcGeneratorConfig"]["edgesLocalityDistribution"]["max"] = outgoing_edges_max
         config["dtmcGeneratorConfig"]["n"] = N
-        # config["forwardCouplingConfig"]["sampleSize"] = N
 
         # Nome del file
         filename = f"{index}.json"

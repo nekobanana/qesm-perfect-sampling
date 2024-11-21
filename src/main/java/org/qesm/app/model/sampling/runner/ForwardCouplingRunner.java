@@ -96,7 +96,9 @@ public class ForwardCouplingRunner implements SamplerRunner {
         writer.close();
     }
 
-
+    public double[] getResultsSteps() {
+        return results.stream().mapToDouble(r -> r.getSteps()).toArray();
+    }
 
     public int getNRuns() {
         return results.size();

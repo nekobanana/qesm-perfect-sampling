@@ -17,7 +17,15 @@ public class Metrics {
         return Math.sqrt(s);
     }
 
-    public static double distanceL2PerN(Map<Integer, Double> v1, Map<Integer, Double> v2, int n) {
+    public static double distanceL2DividedByN(Map<Integer, Double> v1, Map<Integer, Double> v2, int n) {
         return distanceL2(v1, v2, n) / n;
+    }
+
+    public static double totalVariationDistance(Map<Integer, Double> v1, Map<Integer, Double> v2, int n) {
+        double s = 0;
+        for (int i = 0; i < n; i++) {
+            s += 0.5 * Math.abs((v1.getOrDefault(i, 0.)) - (v2.getOrDefault(i, 0.)));
+        }
+        return s;
     }
 }

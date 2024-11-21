@@ -8,14 +8,30 @@ public class Config {
 
     private Long seed;
     private String description;
-    private DTMCGeneratorConfig dtmcGeneratorConfig;
-    private PerfectSamplingConfig perfectSamplingConfig;
-    private ForwardSamplingConfig forwardSamplingConfig;
-    private DumbSamplingConfig dumbSamplingConfig;
-    private ForwardCouplingConfig forwardCouplingConfig;
-    private TransientAnalysisConfig transientAnalysisConfig;
+    private DTMCGeneratorConfig dtmcGeneratorConfig = new DTMCGeneratorConfig();
+    private PerfectSamplingConfig perfectSamplingConfig = new PerfectSamplingConfig();
+    private ForwardSamplingConfig forwardSamplingConfig = new ForwardSamplingConfig();
+    private DumbSamplingConfig dumbSamplingConfig = new DumbSamplingConfig();
+    private ForwardCouplingConfig forwardCouplingConfig = new ForwardCouplingConfig();
+    private TransientAnalysisConfig transientAnalysisConfig = new TransientAnalysisConfig();
     private Output.PerfectSamplingOutput previousPerfectSamplingOutput;
+    private Output.ForwardCouplingOutput previousForwardCouplingOutput;
 
+    public Output.ForwardCouplingOutput getPreviousForwardCouplingOutput() {
+        return previousForwardCouplingOutput;
+    }
+
+    public void setPreviousForwardCouplingOutput(Output.ForwardCouplingOutput previousForwardCouplingOutput) {
+        this.previousForwardCouplingOutput = previousForwardCouplingOutput;
+    }
+
+    public Output.PerfectSamplingOutput getPreviousPerfectSamplingOutput() {
+        return previousPerfectSamplingOutput;
+    }
+
+    public void setPreviousPerfectSamplingOutput(Output.PerfectSamplingOutput previousPerfectSamplingOutput) {
+        this.previousPerfectSamplingOutput = previousPerfectSamplingOutput;
+    }
 
     public Long getSeed() {
         return seed;
@@ -32,14 +48,6 @@ public class Config {
     public void setDescription(String description) {
         this.description = description;
 
-    }
-
-    public Output.PerfectSamplingOutput getPreviousPerfectSamplingOutput() {
-        return previousPerfectSamplingOutput;
-    }
-
-    public void setPreviousPerfectSamplingOutput(Output.PerfectSamplingOutput previousPerfectSamplingOutput) {
-        this.previousPerfectSamplingOutput = previousPerfectSamplingOutput;
     }
 
     public ForwardCouplingConfig getForwardCouplingConfig() {
@@ -142,7 +150,7 @@ public class Config {
         private Class<? extends RandomHelper> randomHelperClass;
         private boolean pythonHistogramImage;
         private boolean pythonLastSequenceImage;
-        private boolean enabled;
+        private boolean enabled = false;
 
         public boolean isPythonHistogramImage() {
             return pythonHistogramImage;
@@ -214,14 +222,49 @@ public class Config {
             this.testClass = testClass;
         }
     }
-
     public static class DumbSamplingConfig {
-        private boolean enabled;
-        private double[] sigmas;
-        private boolean usePerfectSamplingOutput;
-        private int customMean;
-        private int customStdDev;
-        private int customSamplesNumber;
+        private DumbSamplingPSConfig dumbSamplingPSConfig = new DumbSamplingPSConfig();
+        private DumbSamplingFCConfig dumbSamplingFCConfig = new DumbSamplingFCConfig();
+
+        public DumbSamplingPSConfig getDumbSamplingPSConfig() {
+            return dumbSamplingPSConfig;
+        }
+
+        public void setDumbSamplingPSConfig(DumbSamplingPSConfig dumbSamplingPSConfig) {
+            this.dumbSamplingPSConfig = dumbSamplingPSConfig;
+        }
+
+        public DumbSamplingFCConfig getDumbSamplingFCConfig() {
+            return dumbSamplingFCConfig;
+        }
+
+        public void setDumbSamplingFCConfig(DumbSamplingFCConfig dumbSamplingFCConfig) {
+            this.dumbSamplingFCConfig = dumbSamplingFCConfig;
+        }
+    }
+    public static class DumbSamplingPSConfig {
+        private boolean enabled = false;
+        private double[] perfectSamplingSigmas;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+        public double[] getPerfectSamplingSigmas() {
+            return perfectSamplingSigmas;
+        }
+
+        public void setPerfectSamplingSigmas(double[] perfectSamplingSigmas) {
+            this.perfectSamplingSigmas = perfectSamplingSigmas;
+        }
+    }
+
+        public static class DumbSamplingFCConfig {
+        private boolean enabled = false;
+        private int[] forwardCouplingPercentiles;
 
         public boolean isEnabled() {
             return enabled;
@@ -231,49 +274,18 @@ public class Config {
             this.enabled = enabled;
         }
 
-        public double[] getSigmas() {
-            return sigmas;
+        public int[] getForwardCouplingPercentiles() {
+            return forwardCouplingPercentiles;
         }
 
-        public void setSigmas(double[] sigmas) {
-            this.sigmas = sigmas;
+        public void setForwardCouplingPercentiles(int[] forwardCouplingPercentiles) {
+            this.forwardCouplingPercentiles = forwardCouplingPercentiles;
         }
 
-        public boolean isUsePerfectSamplingOutput() {
-            return usePerfectSamplingOutput;
-        }
-
-        public void setUsePerfectSamplingOutput(boolean usePerfectSamplingOutput) {
-            this.usePerfectSamplingOutput = usePerfectSamplingOutput;
-        }
-
-        public int getCustomMean() {
-            return customMean;
-        }
-
-        public void setCustomMean(int customMean) {
-            this.customMean = customMean;
-        }
-
-        public int getCustomStdDev() {
-            return customStdDev;
-        }
-
-        public void setCustomStdDev(int customStdDev) {
-            this.customStdDev = customStdDev;
-        }
-
-        public int getCustomSamplesNumber() {
-            return customSamplesNumber;
-        }
-
-        public void setCustomSamplesNumber(int customSamplesNumber) {
-            this.customSamplesNumber = customSamplesNumber;
-        }
     }
 
     public static class TransientAnalysisConfig {
-        private boolean enabled;
+        private boolean enabled = false;
         private double maxDistanceToSteadyState;
 
         public boolean isEnabled() {
@@ -294,7 +306,7 @@ public class Config {
     }
 
     public static class ForwardSamplingConfig {
-        private boolean enabled;
+        private boolean enabled = false;
         private Class<? extends RandomHelper> randomHelperClass;
 
         public Class<? extends RandomHelper> getRandomHelperClass() {
@@ -315,9 +327,7 @@ public class Config {
     }
 
     public static class ForwardCouplingConfig {
-        private boolean enabled;
-//        private boolean usePerfectSamplingSampleSize = false;
-//        private int sampleSize;
+        private boolean enabled = false;
 
         public boolean isEnabled() {
             return enabled;
@@ -327,20 +337,5 @@ public class Config {
             this.enabled = enabled;
         }
 
-//        public boolean isUsePerfectSamplingSampleSize() {
-//            return usePerfectSamplingSampleSize;
-//        }
-//
-//        public void setUsePerfectSamplingSampleSize(boolean usePerfectSamplingSampleSize) {
-//            this.usePerfectSamplingSampleSize = usePerfectSamplingSampleSize;
-//        }
-//
-//        public int getSampleSize() {
-//            return sampleSize;
-//        }
-//
-//        public void setSampleSize(int sampleSize) {
-//            this.sampleSize = sampleSize;
-//        }
     }
 }

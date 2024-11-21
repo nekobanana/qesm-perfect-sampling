@@ -16,10 +16,11 @@ def generate_RQ2_table(java_results_dir, table_path):
         loc_max = output_json['config']['dtmcGeneratorConfig']['edgesLocalityDistribution']['max']
         results['locality-min'].append(loc_min)
         results['locality-max'].append(loc_max)
-        results['locality'].append(f'[{loc_min}\\comma {loc_max}]')
-        results['ps-mu-steps'].append(f"{output_json['perfectSamplingOutput']['avgSteps']:.2f}")
-        results['ps-sigma-steps'].append(f"{output_json['perfectSamplingOutput']['sigma']:.2f}")
-        results['ps-distance'].append(f"{output_json['perfectSamplingOutput']['distance']:.3E}")
+        if output_json['perfectSamplingOutput'] is not None:
+            results['locality'].append(f'[{loc_min}\\comma {loc_max}]')
+            results['ps-mu-steps'].append(f"{output_json['perfectSamplingOutput']['avgSteps']:.2f}")
+            results['ps-sigma-steps'].append(f"{output_json['perfectSamplingOutput']['sigma']:.2f}")
+            results['ps-distance'].append(f"{output_json['perfectSamplingOutput']['distance']:.3E}")
         for ds_output in output_json['dumbSamplingOutputs']:
             sigma = ds_output['sigmas']
             results[f'd{sigma}-steps'].append(ds_output['steps'])

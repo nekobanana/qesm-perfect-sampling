@@ -12,7 +12,8 @@ public class Output {
     private Config config;
     private SteadyStateAnalysisOutput steadyStateAnalysisOutput;
     private PerfectSamplingOutput perfectSamplingOutput;
-    private List<DumbSamplingOutput> dumbSamplingOutputs = new ArrayList<>();
+    private List<DumbSamplingOutputPS> dumbSamplingOutputsPS = new ArrayList<>();
+    private List<DumbSamplingOutputFC> dumbSamplingOutputsFC = new ArrayList<>();
     private ForwardSamplingOutput forwardSamplingOutput;
     private ForwardCouplingOutput forwardCouplingOutput;
     private DTMCGeneratorOutput dtmcGeneratorOutput;
@@ -25,12 +26,20 @@ public class Output {
         this.perfectSamplingOutput = perfectSamplingOutput;
     }
 
-    public List<DumbSamplingOutput> getDumbSamplingOutputs() {
-        return dumbSamplingOutputs;
+    public List<DumbSamplingOutputPS> getDumbSamplingOutputsPS() {
+        return dumbSamplingOutputsPS;
     }
 
-    public void setDumbSamplingOutputs(List<DumbSamplingOutput> dumbSamplingOutputs) {
-        this.dumbSamplingOutputs = dumbSamplingOutputs;
+    public void setDumbSamplingOutputsPS(List<DumbSamplingOutputPS> dumbSamplingOutputsPS) {
+        this.dumbSamplingOutputsPS = dumbSamplingOutputsPS;
+    }
+
+    public List<DumbSamplingOutputFC> getDumbSamplingOutputsFC() {
+        return dumbSamplingOutputsFC;
+    }
+
+    public void setDumbSamplingOutputsFC(List<DumbSamplingOutputFC> dumbSamplingOutputsFC) {
+        this.dumbSamplingOutputsFC = dumbSamplingOutputsFC;
     }
 
     public ForwardSamplingOutput getForwardSamplingOutput() {
@@ -88,7 +97,8 @@ public class Output {
     public static class PerfectSamplingOutput {
         Float avgSteps;
         Double sigma;
-        Double distance;
+        Double l2DividedByNDistance;
+        Double totalVariationDistance;
         StatisticalTest statisticalTest;
 
         public void setAvgSteps(Float avgSteps) {
@@ -99,8 +109,16 @@ public class Output {
             this.sigma = sigma;
         }
 
-        public void setDistance(Double distance) {
-            this.distance = distance;
+        public void setL2DividedByNDistance(Double l2DividedByNDistance) {
+            this.l2DividedByNDistance = l2DividedByNDistance;
+        }
+
+        public Double getTotalVariationDistance() {
+            return totalVariationDistance;
+        }
+
+        public void setTotalVariationDistance(Double totalVariationDistance) {
+            this.totalVariationDistance = totalVariationDistance;
         }
 
         public Float getAvgSteps() {
@@ -111,8 +129,8 @@ public class Output {
             return sigma;
         }
 
-        public Double getDistance() {
-            return distance;
+        public Double getL2DividedByNDistance() {
+            return l2DividedByNDistance;
         }
 
         public StatisticalTest getStatisticalTest() {
@@ -132,36 +150,67 @@ public class Output {
         this.fileName = fileName;
     }
 
-    public static class DumbSamplingOutput {
-        Double sigmas;
+    public static abstract class DumbSamplingOutput {
         Integer steps;
-        Double distance;
-
-        public void setSigmas(Double sigmas) {
-            this.sigmas = sigmas;
-        }
+        Double l2DividedByNDistance;
+        Double totalVariationDistance;
+        String description;
 
         public void setSteps(Integer steps) {
             this.steps = steps;
         }
 
-        public void setDistance(Double distance) {
-            this.distance = distance;
+        public void setL2DividedByNDistance(Double l2DividedByNDistance) {
+            this.l2DividedByNDistance = l2DividedByNDistance;
         }
 
-        public Double getSigmas() {
-            return sigmas;
-        }
 
         public Integer getSteps() {
             return steps;
         }
 
-        public Double getDistance() {
-            return distance;
+        public Double getL2DividedByNDistance() {
+            return l2DividedByNDistance;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public Double getTotalVariationDistance() {
+            return totalVariationDistance;
+        }
+
+        public void setTotalVariationDistance(Double totalVariationDistance) {
+            this.totalVariationDistance = totalVariationDistance;
         }
     }
+    public static class DumbSamplingOutputPS extends DumbSamplingOutput {
+        Double sigma;
 
+        public Double getSigma() {
+            return sigma;
+        }
+
+        public void setSigma(Double sigma) {
+            this.sigma = sigma;
+        }
+    }
+    public static class DumbSamplingOutputFC extends DumbSamplingOutput {
+        Integer quantile;
+
+        public Integer getQuantile() {
+            return quantile;
+        }
+
+        public void setQuantile(Integer quantile) {
+            this.quantile = quantile;
+        }
+    }
     public static class SteadyStateAnalysisOutput {
         Map<Integer, Double> steadyStateDistribution;
 
@@ -198,6 +247,7 @@ public class Output {
     public static class ForwardCouplingOutput {
         Float avgSteps;
         Double sigma;
+        Double[] quantiles = new Double[101];
 
         public Float getAvgSteps() {
             return avgSteps;
@@ -213,6 +263,14 @@ public class Output {
 
         public void setSigma(Double sigma) {
             this.sigma = sigma;
+        }
+
+        public Double[] getQuantiles() {
+            return quantiles;
+        }
+
+        public void setQuantiles(Double[] quantiles) {
+            this.quantiles = quantiles;
         }
     }
 
